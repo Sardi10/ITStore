@@ -30,7 +30,9 @@
                 <td>@product.QuantityInStock</td>
                 <td>
                     <a class="btn btn-sm btn-outline-warning" asp-action="Edit" asp-route-id="@product.ProductId">Edit</a>
-                    <button class="btn btn-sm btn-outline-danger" disabled>Delete</button>
+                    <form asp-action="Delete" asp-route-id="@product.ProductId" method="post" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this product?');">
+                        <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                    </form>
                 </td>
             </tr>
         }

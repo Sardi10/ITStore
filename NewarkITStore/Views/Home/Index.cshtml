@@ -1,8 +1,25 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model List<NewarkITStore.Models.Product>
+
+@{
+    ViewData["Title"] = "Welcome to Newark-IT Store";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<h2>Featured Products</h2>
+
+<div class="row">
+    @foreach (var product in Model)
+    {
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">@product.Name</h5>
+                    <h6 class="card-subtitle text-muted">@product.ProductType?.Name</h6>
+                    <p class="card-text">@product.Description</p>
+                    <p><strong>Price:</strong> $@product.RecommendedPrice</p>
+                    <p><strong>Stock:</strong> @product.QuantityInStock</p>
+                    <button class="btn btn-outline-primary" disabled>Add to Basket (coming soon)</button>
+                </div>
+            </div>
+        </div>
+    }
 </div>

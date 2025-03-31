@@ -1,0 +1,40 @@
+﻿@model List<NewarkITStore.Models.Product>
+
+@{
+    ViewData["Title"] = "Manage Products";
+}
+
+<h2>Manage Products</h2>
+
+<a class="btn btn-success mb-3" asp-action="Create">+ Add New Product</a>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Description</th>
+            <th>Price</th>
+            <th>Stock</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var product in Model)
+        {
+            <tr>
+                <td>@product.Name</td>
+                <td>@product.ProductType?.Name</td>
+                <td>@product.Description</td>
+                <td>$@product.RecommendedPrice</td>
+                <td>@product.QuantityInStock</td>
+                <td>
+                    <a class="btn btn-sm btn-outline-warning" asp-action="Edit" asp-route-id="@product.ProductId">Edit</a>
+                    <form asp-action="Delete" asp-route-id="@product.ProductId" method="post" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this product?');">
+                        <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

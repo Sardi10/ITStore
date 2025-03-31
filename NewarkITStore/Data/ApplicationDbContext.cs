@@ -15,4 +15,17 @@ public class ApplicationDbContext : IdentityDbContext
     public DbSet<Product> Products { get; set; }
     public DbSet<BasketItem> BasketItems { get; set; }
 
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+
+        // Set precision for price fields
+        modelBuilder.Entity<Product>()
+            .Property(p => p.RecommendedPrice)
+            .HasPrecision(18, 2); // Decimal(18,2)
+
+        modelBuilder.Entity<BasketItem>()
+            .Property(b => b.PricePerUnit)
+            .HasPrecision(18, 2);
+    }
 }

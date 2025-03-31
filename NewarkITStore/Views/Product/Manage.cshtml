@@ -6,6 +6,8 @@
 
 <h2>Manage Products</h2>
 
+<a class="btn btn-success mb-3" asp-action="Create">+ Add New Product</a>
+
 <table class="table table-bordered table-striped">
     <thead>
         <tr>
@@ -27,7 +29,7 @@
                 <td>$@product.RecommendedPrice</td>
                 <td>@product.QuantityInStock</td>
                 <td>
-                    <button class="btn btn-sm btn-outline-warning" disabled>Edit</button>
+                    <a class="btn btn-sm btn-outline-warning" asp-action="Edit" asp-route-id="@product.ProductId">Edit</a>
                     <button class="btn btn-sm btn-outline-danger" disabled>Delete</button>
                 </td>
             </tr>

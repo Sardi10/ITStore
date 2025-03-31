@@ -1,0 +1,36 @@
+﻿@model List<NewarkITStore.Models.Product>
+
+@{
+    ViewData["Title"] = "Manage Products";
+}
+
+<h2>Manage Products</h2>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Description</th>
+            <th>Price</th>
+            <th>Stock</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var product in Model)
+        {
+            <tr>
+                <td>@product.Name</td>
+                <td>@product.ProductType?.Name</td>
+                <td>@product.Description</td>
+                <td>$@product.RecommendedPrice</td>
+                <td>@product.QuantityInStock</td>
+                <td>
+                    <button class="btn btn-sm btn-outline-warning" disabled>Edit</button>
+                    <button class="btn btn-sm btn-outline-danger" disabled>Delete</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

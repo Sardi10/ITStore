@@ -1,4 +1,5 @@
-﻿public class Product
+﻿namespace NewarkITStore.Models;
+public class Product
 {
     public int ProductId { get; set; }
 

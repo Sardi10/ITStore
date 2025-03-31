@@ -1,4 +1,5 @@
-﻿public class BasketItem
+﻿namespace NewarkITStore.Models;
+public class BasketItem
 {
     public int BasketItemId { get; set; }
 

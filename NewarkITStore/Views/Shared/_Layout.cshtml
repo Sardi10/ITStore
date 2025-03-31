@@ -7,6 +7,19 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/NewarkITStore.styles.css" asp-append-version="true" />
+    <style>
+        /* Open dropdown on hover */
+        .hover-dropdown:hover .dropdown-menu {
+            display: block;
+            margin-top: 0;
+        }
+
+        /* Optional: smoothly fade in dropdown */
+        .dropdown-menu {
+            transition: all 0.2s ease-in-out;
+        }
+    </style>
+
 </head>
 <body>
     <header>
@@ -19,6 +32,19 @@
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item dropdown hover-dropdown">
+                                <a class="nav-link dropdown-toggle text-dark" href="#" id="adminDropdown" role="button">
+                                    Admin
+                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="adminDropdown">
+                                    <li><a class="dropdown-item" asp-controller="Admin" asp-action="Users">Manage Users</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Admin" asp-action="Orders">Manage Orders</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Admin" asp-action="Statistics">View Statistics</a></li>
+                                </ul>
+                            </li>
+                        }
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>

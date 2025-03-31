@@ -1,0 +1,38 @@
+﻿@model List<NewarkITStore.ViewModels.UserViewModel>
+
+@{
+    ViewData["Title"] = "Manage Users";
+}
+
+<h2>Manage Users</h2>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Email</th>
+            <th>Roles</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model)
+        {
+            <tr>
+                <td>@user.Email</td>
+                <td>@user.Roles</td>
+                <td>
+                    <form asp-action="PromoteToAdmin" asp-controller="Admin" method="post" style="display:inline">
+                        <input type="hidden" name="id" value="@user.Id" />
+                        <button class="btn btn-sm btn-success" type="submit" @(user.Roles.Contains("Admin") ? "disabled" : "")>
+                            Promote to Admin
+                        </button>
+                    </form>
+                    <form asp-action="DeleteUser" asp-controller="Admin" method="post" style="display:inline" onsubmit="return confirm('Are you sure?');">
+                        <input type="hidden" name="id" value="@user.Id" />
+                        <button class="btn btn-sm btn-danger" type="submit">Delete</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

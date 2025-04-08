@@ -44,13 +44,29 @@ namespace NewarkITStore.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Create(Product product)
+        public async Task<IActionResult> Create(Product product, IFormFile imageFile)
         {
             if (ModelState.IsValid)
             {
-                _context.Products.Add(product);
+                if (imageFile != null && imageFile.Length > 0)
+                {
+                    // Create path
+                    var fileName = Path.GetFileName(imageFile.FileName);
+                    var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Images", fileName);
+
+                    // Save file to wwwroot/images
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await imageFile.CopyToAsync(stream);
+                    }
+
+                    // Save the filename in the product
+                    product.ImageFileName = fileName;
+                }
+
+                _context.Add(product);
                 await _context.SaveChangesAsync();
-                return RedirectToAction("Manage");
+                return RedirectToAction(nameof(Manage));
             }
 
             ViewBag.ProductTypes = new SelectList(_context.ProductTypes, "ProductTypeId", "Name", product.ProductTypeId);
@@ -74,25 +90,49 @@ namespace NewarkITStore.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Edit(int id, Product product)
+        public async Task<IActionResult> Edit(int id, Product product, IFormFile imageFile)
         {
-            if (id != product.ProductId) return NotFound();
+            if (id != product.ProductId)
+                return NotFound();
 
             if (ModelState.IsValid)
             {
                 try
                 {
+                    if (imageFile != null && imageFile.Length > 0)
+                    {
+                        var fileName = Path.GetFileName(imageFile.FileName);
+                        var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Images", fileName);
+
+                        using (var stream = new FileStream(filePath, FileMode.Create))
+                        {
+                            await imageFile.CopyToAsync(stream);
+                        }
+
+                        product.ImageFileName = fileName;
+                    }
+                    else
+                    {
+                        // Keep existing image if no new file is uploaded
+                        var existingProduct = await _context.Products
+                            .AsNoTracking()
+                            .FirstOrDefaultAsync(p => p.ProductId == id);
+
+                        product.ImageFileName = existingProduct?.ImageFileName;
+                    }
+
                     _context.Update(product);
                     await _context.SaveChangesAsync();
-                    return RedirectToAction("Manage");
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!_context.Products.Any(p => p.ProductId == id))
+                    if (!_context.Products.Any(e => e.ProductId == product.ProductId))
                         return NotFound();
                     else
                         throw;
                 }
+
+                return RedirectToAction(nameof(Manage));
             }
 
             ViewBag.ProductTypes = new SelectList(_context.ProductTypes, "ProductTypeId", "Name", product.ProductTypeId);

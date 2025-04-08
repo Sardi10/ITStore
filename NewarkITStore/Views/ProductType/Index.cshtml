@@ -1,0 +1,33 @@
+﻿@model IEnumerable<NewarkITStore.Models.ProductType>
+
+@{
+    ViewData["Title"] = "Manage Product Types";
+}
+
+<h2>Manage Product Types</h2>
+
+<a class="btn btn-success mb-3" asp-action="Create">+ Add New Type</a>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var type in Model)
+    {
+        <tr>
+            <td>@type.Name</td>
+            <td>
+                <a class="btn btn-sm btn-outline-warning" asp-action="Edit" asp-route-id="@type.ProductTypeId">Edit</a>
+
+                <form asp-action="Delete" asp-route-id="@type.ProductTypeId" method="post" style="display:inline;" onsubmit="return confirm('Delete this product type?');">
+                    <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                </form>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>

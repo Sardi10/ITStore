@@ -1,0 +1,40 @@
+﻿@model IEnumerable<NewarkITStore.Models.BasketItem>
+
+@{
+    ViewData["Title"] = "Your Basket";
+}
+
+<h2>Your Shopping Basket</h2>
+
+@if (!Model.Any())
+{
+    <p>Your basket is empty.</p>
+}
+else
+{
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Price</th>
+                <th>Quantity</th>
+                <th>Total</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Product.Name</td>
+                    <td>$@item.PricePerUnit</td>
+                    <td>@item.Quantity</td>
+                    <td>$@(item.PricePerUnit * item.Quantity)</td>
+                    <td>
+                        <a asp-action="Remove" asp-route-id="@item.BasketItemId" class="btn btn-danger btn-sm">Remove</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

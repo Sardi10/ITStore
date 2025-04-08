@@ -15,6 +15,8 @@ public class Product
     public decimal RecommendedPrice { get; set; }
     [Range(0, 100000)]
     public int QuantityInStock { get; set; }
+    [Display(Name = "Image File Name")]
+    public string? ImageFileName { get; set; }
 
     [Display(Name = "Product Type")]
     public int ProductTypeId { get; set; }

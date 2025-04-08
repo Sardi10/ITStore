@@ -1,0 +1,46 @@
+﻿@model IEnumerable<NewarkITStore.Models.BasketItem>
+
+@{
+    ViewData["Title"] = "Your Cart";
+}
+
+<h2>Your Cart (@Model.Count() items)</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Item</th>
+            <th>Price</th>
+            <th>Quantity</th>
+            <th>Total</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody id="cart-body">
+        @foreach (var item in Model)
+        {
+            <tr id="row-@item.BasketItemId">
+                @await Html.PartialAsync("_BasketRow", item)
+            </tr>
+        }
+    </tbody>
+</table>
+
+<div id="cart-summary">
+    @await Html.PartialAsync("_BasketSummary", Model)
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script>
+        function updateQuantity(itemId, action) {
+            $.post(`/Basket/${action}Quantity`, { id: itemId }, function (response) {
+                $(`#row-${itemId}`).html(response);
+
+                // Refresh the summary (optional)
+                $("#cart-summary").load("/Basket/CartSummary");
+            });
+        }
+    </script>
+}

@@ -1,0 +1,24 @@
+﻿@model NewarkITStore.Models.BasketItem
+
+<td>
+    <img src="@Url.Content($"~/images/{Model.Product.ImageFileName}")" alt="..." width="70" />
+    <strong>@Model.Product.Name</strong>
+</td>
+<td>$@Model.PricePerUnit.ToString("0.00")</td>
+<td>
+    <div class="input-group">
+        <button onclick="updateQuantity(@Model.BasketItemId, 'Decrease')" class="btn btn-outline-secondary">-</button>
+        <input type="text" value="@Model.Quantity" class="text-center" readonly />
+        <button onclick="updateQuantity(@Model.BasketItemId, 'Increase')" class="btn btn-outline-secondary">+</button>
+    </div>
+</td>
+<td>@($"{(Model.Quantity * Model.PricePerUnit):0.00}")</td>
+<td>
+    <form asp-action="Remove" method="post">
+        <input type="hidden" name="basketItemId" value="@Model.BasketItemId" />
+        <button type="submit" class="btn btn-outline-danger btn-sm">
+            <i class="bi bi-trash"></i> Remove
+        </button>
+    </form>
+
+</td>

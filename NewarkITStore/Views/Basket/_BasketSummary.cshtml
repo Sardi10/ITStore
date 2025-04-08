@@ -1,0 +1,16 @@
+﻿@model IEnumerable<NewarkITStore.Models.BasketItem>
+
+@{
+    var subtotal = Model.Sum(i => i.Quantity * i.PricePerUnit);
+    var tax = subtotal * 0.10M;
+    var total = subtotal + tax;
+}
+
+<div class="card p-3 mt-4  col-md-4 ">
+    <h5>Summary</h5>
+    <p>Subtotal: $@subtotal.ToString("0.00")</p>
+    <p>Sales Tax (10%): $@tax.ToString("0.00")</p>
+    <hr />
+    <p><strong>Grand Total: $@total.ToString("0.00")</strong></p>
+    <button class="btn btn-success btn-block">Check out</button>
+</div>

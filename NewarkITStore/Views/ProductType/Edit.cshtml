@@ -1,0 +1,20 @@
+﻿@model NewarkITStore.Models.ProductType
+
+@{
+    ViewData["Title"] = "Edit Product Type";
+}
+
+<h2>Edit Product Type</h2>
+
+<form asp-action="Edit" method="post">
+    <input type="hidden" asp-for="ProductTypeId" />
+
+    <div class="form-group">
+        <label asp-for="Name"></label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Update</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>

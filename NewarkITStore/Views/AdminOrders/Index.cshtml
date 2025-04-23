@@ -1,0 +1,66 @@
+﻿@model List<NewarkITStore.ViewModels.AdminOrderViewModel>  
+@using NewarkITStore.Models
+@using static NewarkITStore.Models.Order
+
+
+@{
+    ViewData["Title"] = "All Orders";
+}
+
+<h2>All Orders</h2>
+
+<table class="table table-bordered">
+    <thead class="table-light">
+        <tr>
+            <th>Order #</th>
+            <th>User ID</th>
+            <th>Order Date</th>
+            <th>Status</th>
+            <th>Total</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var order in Model)
+        {
+            <tr>
+                <td>@order.OrderId</td>
+                <td>@order.UserEmail</td>
+                <td>@order.OrderDate.ToShortDateString()</td>
+                <td>
+                    <span class="badge bg-@GetStatusColor(order.Status)">
+                        @order.Status
+                    </span>
+                </td>
+                <td>
+                    @order.Total.ToString("C")
+                </td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@order.OrderId" class="btn btn-sm btn-outline-primary">View</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@functions {
+    private string GetStatusColor(OrderStatus status)
+    {
+        return status switch
+        {
+            OrderStatus.Pending => "warning",
+            OrderStatus.Shipped => "info",
+            OrderStatus.Delivered => "success",
+            OrderStatus.Cancelled => "danger",
+            _ => "secondary"
+        };
+    }
+}
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}

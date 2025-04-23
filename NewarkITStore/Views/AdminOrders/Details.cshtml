@@ -1,0 +1,61 @@
+﻿@model NewarkITStore.Models.Order
+@using NewarkITStore.Models
+@using static NewarkITStore.Models.Order
+
+@{
+    ViewData["Title"] = "Order Details";
+}
+
+<h2>Order #@Model.OrderId</h2>
+<p><strong>Order Date:</strong> @Model.OrderDate.ToShortDateString()</p>
+
+<hr />
+
+<h4>Order Items</h4>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Product</th>
+            <th>Price</th>
+            <th>Qty</th>
+            <th>Total</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.OrderItems)
+        {
+            <tr>
+                <td>@item.Product.Name</td>
+                <td>@item.PricePerUnit.ToString("C")</td>
+                <td>@item.Quantity</td>
+                <td>@((item.PricePerUnit * item.Quantity).ToString("C"))</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<p class="text-end"><strong>Order Total:</strong> @Model.OrderItems.Sum(i => i.PricePerUnit * i.Quantity).ToString("C")</p>
+
+<hr />
+
+<h4>Update Order Status</h4>
+
+<form asp-action="UpdateStatus" method="post">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="id" value="@Model.OrderId" />
+
+    <div class="form-group">
+        <label for="newStatus">Status:</label>
+        <select name="newStatus" class="form-control" required>
+            @foreach (OrderStatus status in Enum.GetValues(typeof(OrderStatus)))
+            {
+                <option value="@status" selected="@(status == Model.Status)">
+                    @status
+                </option>
+            }
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary mt-2">Update Status</button>
+    <a asp-action="Index" class="btn btn-secondary mt-2">Back to Orders</a>
+</form>

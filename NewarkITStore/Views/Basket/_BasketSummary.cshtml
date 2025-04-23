@@ -14,7 +14,10 @@
     <p>Sales Tax (10%): $@tax.ToString("0.00")</p>
     <hr />
     <p><strong>Grand Total: $@total.ToString("0.00")</strong></p>
-    <button class="btn btn-success btn-block">Check out</button>
+    <form asp-action="Checkout" method="post">
+    @Html.AntiForgeryToken()
+    <button type="submit" class="btn btn-success w-100 mt-2">Check Out</button>
+</form>
 </div>
 </div>
 </div>

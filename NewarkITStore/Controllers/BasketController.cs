@@ -114,5 +114,60 @@ namespace NewarkITStore.Controllers
 
             return PartialView("_BasketSummary", basket);
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Checkout()
+        {
+            var userId = _userManager.GetUserId(User);
+            var basketItems = await _context.BasketItems
+                .Include(b => b.Product)
+                .Where(b => b.UserId == userId)
+                .ToListAsync();
+
+            if (!basketItems.Any())
+            {
+                TempData["Error"] = "Your cart is empty.";
+                return RedirectToAction("Index");
+            }
+
+            // Create the order
+            var order = new Order
+            {
+                UserId = userId,
+                OrderDate = DateTime.Now,
+                TotalAmount = basketItems.Sum(i => i.PricePerUnit * i.Quantity),
+                OrderItems = basketItems.Select(item => new OrderItem
+                {
+                    ProductId = item.ProductId,
+                    Quantity = item.Quantity,
+                    PricePerUnit = item.PricePerUnit
+                }).ToList()
+            };
+
+            _context.Orders.Add(order);
+
+            // Clear basket
+            _context.BasketItems.RemoveRange(basketItems);
+
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = "Order placed successfully!";
+            return RedirectToAction("OrderConfirmation", new { orderId = order.OrderId });
+        }
+
+        public async Task<IActionResult> OrderConfirmation(int orderId)
+        {
+            var order = await _context.Orders
+                .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Product)
+                .FirstOrDefaultAsync(o => o.OrderId == orderId);
+
+            if (order == null)
+                return NotFound();
+
+            return View(order);
+        }
+
     }
 }

@@ -9,6 +9,48 @@
 
 <h2>All Orders</h2>
 
+<form asp-action="Index" method="get" class="mb-4">
+    <div class="row">
+        <div class="col-md-4 mb-2">
+            <input type="text" name="searchEmail" value="@Context.Request.Query["searchEmail"]"
+                   class="form-control" placeholder="Search by email..." />
+        </div>
+
+        <div class="col-md-4 mb-2">
+            <select name="filterStatus" class="form-control">
+                <option value="">All Statuses</option>
+                @foreach (var status in Enum.GetValues(typeof(OrderStatus)))
+                {
+                    var selected = Context.Request.Query["filterStatus"] == status.ToString() ? "selected" : "";
+                    <option value="@status" selected="@(Context.Request.Query["filterStatus"] == status.ToString() ? "selected" : null)">
+                        @status
+                    </option>
+
+                }
+            </select>
+        </div>
+
+        <div class="col-md-2 mb-2">
+            <button type="submit" class="btn btn-primary btn-block">Filter</button>
+        </div>
+    </div>
+</form>
+
+@if (!string.IsNullOrEmpty(Context.Request.Query["searchEmail"]) || !string.IsNullOrEmpty(Context.Request.Query["filterStatus"]))
+{
+    <p>
+        Showing results for:
+        @if (!string.IsNullOrEmpty(Context.Request.Query["searchEmail"]))
+        {
+            <strong>Email:</strong> @Context.Request.Query["searchEmail"]
+        }
+        @if (!string.IsNullOrEmpty(Context.Request.Query["filterStatus"]))
+        {
+            <strong>Status:</strong> @Context.Request.Query["filterStatus"]
+        }
+    </p>
+}
+
 <table class="table table-bordered">
     <thead class="table-light">
         <tr>

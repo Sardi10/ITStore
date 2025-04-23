@@ -19,29 +19,41 @@ namespace NewarkITStore.Controllers
         }
 
         // GET: AdminOrders
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string searchEmail, OrderStatus? filterStatus)
         {
-            var orders = await _context.Orders
+            var query = _context.Orders
                 .Include(o => o.User)
                 .Include(o => o.OrderItems)
                 .ThenInclude(oi => oi.Product)
-                .Select(o => new AdminOrderViewModel
+                .AsQueryable();
+
+            if (!string.IsNullOrEmpty(searchEmail))
+            {
+                query = query.Where(o => o.User.Email.Contains(searchEmail));
+            }
+
+            if (filterStatus.HasValue)
+            {
+                query = query.Where(o => o.Status == filterStatus.Value);
+            }
+
+            var orders = await query.Select(o => new AdminOrderViewModel
+            {
+                OrderId = o.OrderId,
+                UserEmail = o.User.Email,
+                OrderDate = o.OrderDate,
+                Status = o.Status,
+                Items = o.OrderItems.Select(oi => new OrderItemDetail
                 {
-                    OrderId = o.OrderId,
-                    UserEmail = o.User.Email,
-                    OrderDate = o.OrderDate,
-                    Status = o.Status,
-                    Items = o.OrderItems.Select(oi => new OrderItemDetail
-                    {
-                        ProductName = oi.Product.Name,
-                        Quantity = oi.Quantity,
-                        PricePerUnit = oi.PricePerUnit
-                    }).ToList()
-                })
-                .ToListAsync();
+                    ProductName = oi.Product.Name,
+                    Quantity = oi.Quantity,
+                    PricePerUnit = oi.PricePerUnit
+                }).ToList()
+            }).ToListAsync();
 
             return View(orders);
-        }
+        
+    }
 
 
         // GET: AdminOrders/Details/5

@@ -1,0 +1,30 @@
+﻿@model NewarkITStore.Models.Order
+
+<h2>Order Confirmation</h2>
+<p>Thank you for your purchase!</p>
+<p><strong>Order #: </strong>@Model.OrderId</p>
+<p><strong>Date:</strong> @Model.OrderDate.ToShortDateString()</p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Product</th>
+            <th>Price</th>
+            <th>Qty</th>
+            <th>Total</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.OrderItems)
+        {
+            <tr>
+                <td>@item.Product.Name</td>
+                <td>@item.PricePerUnit.ToString("C")</td>
+                <td>@item.Quantity</td>
+                <td>@((item.PricePerUnit * item.Quantity).ToString("C"))</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<h4 class="text-end">Total: <strong>@Model.TotalAmount.ToString("C")</strong></h4>

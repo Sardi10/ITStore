@@ -117,7 +117,7 @@ namespace NewarkITStore.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Checkout()
+        public async Task<IActionResult> Checkout(string CardholderName, string CardNumber, string Expiration, string CVV)
         {
             var userId = _userManager.GetUserId(User);
             var basketItems = await _context.BasketItems
@@ -131,7 +131,10 @@ namespace NewarkITStore.Controllers
                 return RedirectToAction("Index");
             }
 
-            // Create the order
+            // Log or use fake card data (optional)
+            Console.WriteLine($"Fake payment processed for {CardholderName}, card: {CardNumber}");
+
+            // Create order
             var order = new Order
             {
                 UserId = userId,
@@ -146,8 +149,6 @@ namespace NewarkITStore.Controllers
             };
 
             _context.Orders.Add(order);
-
-            // Clear basket
             _context.BasketItems.RemoveRange(basketItems);
 
             await _context.SaveChangesAsync();
@@ -155,6 +156,7 @@ namespace NewarkITStore.Controllers
             TempData["Success"] = "Order placed successfully!";
             return RedirectToAction("OrderConfirmation", new { orderId = order.OrderId });
         }
+
 
         public async Task<IActionResult> OrderConfirmation(int orderId)
         {
@@ -181,6 +183,24 @@ namespace NewarkITStore.Controllers
                 .ToListAsync();
 
             return View(orders);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> CheckoutReview()
+        {
+            var userId = _userManager.GetUserId(User);
+            var basketItems = await _context.BasketItems
+                .Include(b => b.Product)
+                .Where(b => b.UserId == userId)
+                .ToListAsync();
+
+            if (!basketItems.Any())
+            {
+                TempData["Error"] = "Your cart is empty.";
+                return RedirectToAction("Index");
+            }
+
+            return View(basketItems);
         }
 
     }

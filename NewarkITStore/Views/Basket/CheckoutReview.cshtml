@@ -1,0 +1,66 @@
+﻿@model IEnumerable<NewarkITStore.Models.BasketItem>
+
+@{
+    ViewData["Title"] = "Review & Payment";
+    var subtotal = Model.Sum(i => i.Quantity * i.PricePerUnit);
+    var tax = subtotal * 0.10m;
+    var total = subtotal + tax;
+}
+
+<h2>Review Your Order</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Product</th>
+            <th>Qty</th>
+            <th>Price</th>
+            <th>Total</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Product.Name</td>
+                <td>@item.Quantity</td>
+                <td>@item.PricePerUnit.ToString("C")</td>
+                <td>@((item.Quantity * item.PricePerUnit).ToString("C"))</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<h4 class="text-end">Total: <strong>@total.ToString("C")</strong></h4>
+
+<hr />
+<h3>Payment Info</h3>
+
+<form asp-action="Checkout" method="post">
+    @Html.AntiForgeryToken()
+
+    <div class="mb-3">
+        <label class="form-label">Cardholder Name</label>
+        <input type="text" name="CardholderName" class="form-control" required />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Card Number</label>
+        <input type="text" name="CardNumber" class="form-control" maxlength="16" required />
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label class="form-label">Expiration Date</label>
+            <input type="text" name="Expiration" class="form-control" placeholder="MM/YY" required />
+        </div>
+        <div class="col-md-6 mb-3">
+            <label class="form-label">CVV</label>
+            <input type="text" name="CVV" class="form-control" maxlength="4" required />
+        </div>
+    </div>
+
+    <div class="text-end mb-5">
+    <button type="submit" class="btn btn-success mt-3">Pay & Place Order</button>
+</div>
+</form>

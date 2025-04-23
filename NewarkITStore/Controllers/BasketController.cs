@@ -169,5 +169,19 @@ namespace NewarkITStore.Controllers
             return View(order);
         }
 
+        [Authorize]
+        public async Task<IActionResult> OrderHistory()
+        {
+            var userId = _userManager.GetUserId(User);
+            var orders = await _context.Orders
+                .Where(o => o.UserId == userId)
+                .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.Product)
+                .OrderByDescending(o => o.OrderDate)
+                .ToListAsync();
+
+            return View(orders);
+        }
+
     }
 }

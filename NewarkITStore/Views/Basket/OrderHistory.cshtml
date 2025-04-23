@@ -1,0 +1,40 @@
+﻿@model IEnumerable<NewarkITStore.Models.Order>
+
+@{
+    ViewData["Title"] = "Order History";
+}
+
+<h2>Order History</h2>
+
+@foreach (var order in Model)
+{
+    <div class="card mb-4">
+        <div class="card-header">
+            <strong>Order #: @order.OrderId</strong> - @order.OrderDate.ToShortDateString()
+        </div>
+        <div class="card-body">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Qty</th>
+                        <th>Price</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in order.OrderItems)
+                    {
+                        <tr>
+                            <td>@item.Product.Name</td>
+                            <td>@item.Quantity</td>
+                            <td>@item.PricePerUnit.ToString("C")</td>
+                            <td>@((item.Quantity * item.PricePerUnit).ToString("C"))</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            <strong>Total: @order.TotalAmount.ToString("C")</strong>
+        </div>
+    </div>
+}

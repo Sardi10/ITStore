@@ -6,11 +6,15 @@
     var total = subtotal + tax;
 }
 
-<div class="card p-3 mt-4  col-md-4 ">
-    <h5>Summary</h5>
+<div class="d-flex justify-content-end">
+    <div class="card" style="min-width: 300px; max-width: 400px;">
+        <div class="card-body  mt-8  col-md-12">
+            <h5 class="card-title">Summary</h5>
     <p>Subtotal: $@subtotal.ToString("0.00")</p>
     <p>Sales Tax (10%): $@tax.ToString("0.00")</p>
     <hr />
     <p><strong>Grand Total: $@total.ToString("0.00")</strong></p>
     <button class="btn btn-success btn-block">Check out</button>
+</div>
+</div>
 </div>

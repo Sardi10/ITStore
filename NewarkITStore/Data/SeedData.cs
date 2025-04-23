@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.DependencyInjection;
+using NewarkITStore.Models;  // Needed for ApplicationUser
 
 namespace NewarkITStore.Data
 {
@@ -6,7 +8,7 @@ namespace NewarkITStore.Data
     {
         public static async Task Initialize(IServiceProvider serviceProvider)
         {
-            var userManager = serviceProvider.GetRequiredService<UserManager<IdentityUser>>();
+            var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
             var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
             // Step 1: Create roles
@@ -26,7 +28,7 @@ namespace NewarkITStore.Data
 
             if (await userManager.FindByEmailAsync(email) == null)
             {
-                var adminUser = new IdentityUser
+                var adminUser = new ApplicationUser
                 {
                     UserName = email,
                     Email = email,

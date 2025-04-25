@@ -18,6 +18,8 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Order> Orders { get; set; }
     public DbSet<OrderItem> OrderItems { get; set; }
     public DbSet<CreditCard> CreditCards { get; set; }
+    public DbSet<ShippingAddress> ShippingAddresses { get; set; }
+
 
 
 

@@ -101,6 +101,27 @@ namespace NewarkITStore.Controllers
             return View(address);
         }
 
+        // GET: ShippingAddress/Details/5
+        public async Task<IActionResult> Details(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var userId = _userManager.GetUserId(User);
+            var address = await _context.ShippingAddresses
+                .FirstOrDefaultAsync(m => m.Id == id && m.UserId == userId);
+
+            if (address == null)
+            {
+                return NotFound();
+            }
+
+            return View(address);
+        }
+
+
         // GET: ShippingAddress/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {

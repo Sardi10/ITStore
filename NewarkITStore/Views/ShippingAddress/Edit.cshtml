@@ -1,23 +1,22 @@
 ﻿@model NewarkITStore.Models.ShippingAddress
-@using Microsoft.AspNetCore.Mvc.Rendering
-
 @{
     ViewData["Title"] = "Edit Shipping Address";
-    var countries = new List<SelectListItem> {
-        new("Choose Country", ""), new("United States", "United States"), new("Canada", "Canada")
-    };
-    var states = new List<SelectListItem> {
-        new("Choose State", ""), new("New York", "New York"), new("New Jersey", "New Jersey")
-    };
 }
 
-<h2>Edit Shipping Address</h2>
+<h2>@ViewData["Title"]</h2>
 
 <form asp-action="Edit" method="post">
     <input type="hidden" asp-for="Id" />
-    <partial name="Create" model="Model" />
+    @Html.Partial("_ShippingAddressForm", Model)
+
     <div class="text-end">
         <button type="submit" class="btn btn-success">Update</button>
         <a asp-action="Index" class="btn btn-secondary">Cancel</a>
     </div>
 </form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

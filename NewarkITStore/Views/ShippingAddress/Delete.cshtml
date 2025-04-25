@@ -1,0 +1,25 @@
+﻿@model NewarkITStore.Models.ShippingAddress
+@{
+    ViewData["Title"] = "Delete Shipping Address";
+}
+
+<h2>Are you sure you want to delete this address?</h2>
+
+<dl class="row">
+    <dt class="col-sm-3">Address Name</dt>
+    <dd class="col-sm-9">@Model.AddressName</dd>
+    <dt class="col-sm-3">Street</dt>
+    <dd class="col-sm-9">@Model.Street @Model.StreetNumber</dd>
+    <dt class="col-sm-3">City</dt>
+    <dd class="col-sm-9">@Model.City</dd>
+    <dt class="col-sm-3">ZIP</dt>
+    <dd class="col-sm-9">@Model.Zip</dd>
+    <dt class="col-sm-3">Country</dt>
+    <dd class="col-sm-9">@Model.Country</dd>
+</dl>
+
+<form asp-action="Delete">
+    <input type="hidden" asp-for="Id" />
+    <button type="submit" class="btn btn-danger">Delete</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>

@@ -1,4 +1,6 @@
-﻿@model List<NewarkITStore.Models.Product>
+﻿@using Microsoft.AspNetCore.Identity
+@inject SignInManager<ApplicationUser> SignInManager
+@model List<NewarkITStore.Models.Product>
 
 @{
     ViewData["Title"] = "Welcome to Newark-IT Store";
@@ -24,11 +26,26 @@
                     <p class="card-text">@product.Description</p>
                     <p><strong>Price:</strong> $@product.RecommendedPrice</p>
                     @* <p><strong>Stock:</strong> @product.QuantityInStock</p> *@
-                    <form asp-controller="Basket" asp-action="Add" method="post">
-                        <input type="hidden" name="productId" value="@product.ProductId" />
-                        <button type="submit" class="btn btn-outline-primary">Add to Basket</button>
-                    </form>
-
+                    @* <form asp-controller="Basket" asp-action="Add" method="post"> *@
+                    @*     <input type="hidden" name="productId" value="@product.ProductId" /> *@
+                    @*     <button type="submit" class="btn btn-outline-primary">Add to Basket</button> *@
+                    @* </form> *@
+                 
+                        @if (SignInManager.IsSignedIn(User))
+                        {
+                            <form asp-controller="Basket" asp-action="Add" method="post">
+                                <input type="hidden" name="productId" value="@product.ProductId" />
+                                <button type="submit" class="btn btn-outline-primary">Add to Basket</button>
+                            </form>
+                        }
+                        else
+                        {
+                            <form method="get" asp-area="Identity" asp-page="/Account/Login">
+                                <input type="hidden" name="ReturnUrl" value="/Home" />
+                                <button type="submit" class="btn btn-outline-primary">Add to Basket</button>
+                            </form>
+                        }
+                    
 
                 </div>
             </div>

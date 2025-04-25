@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using NewarkITStore.Data;
 using NewarkITStore.Models;
@@ -13,6 +14,8 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 
+//builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<ApplicationDbContext>();
+
 //  Only use AddIdentity with ApplicationUser (Remove AddDefaultIdentity!)
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 {
@@ -21,11 +24,21 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 .AddEntityFrameworkStores<ApplicationDbContext>()
 .AddDefaultTokenProviders();
 
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.LoginPath = "/Identity/Account/Login";
+    options.LogoutPath = "/Identity/Account/Logout";
+    options.AccessDeniedPath = "/Identity/Account/AccessDenied";
+});
+
+
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddRazorPages(); // 
+
+builder.Services.AddTransient<IEmailSender, NewarkITStore.Services.FakeEmailSender>();
 
 var app = builder.Build();
 

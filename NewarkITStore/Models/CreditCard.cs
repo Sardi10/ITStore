@@ -50,9 +50,9 @@ namespace NewarkITStore.Models
         public DateTime ExpiryDate { get; set; }
 
         // Foreign Key to ApplicationUser
-        public string UserId { get; set; }
+        public string? UserId { get; set; }
 
         [ForeignKey("UserId")]
-        public ApplicationUser User { get; set; }
+        public ApplicationUser? User { get; set; }
     }
 }

@@ -1,10 +1,41 @@
 ﻿@model NewarkITStore.Models.CreditCard
+@using Microsoft.AspNetCore.Mvc.Rendering
 
 @{
     ViewData["Title"] = "Add New Credit Card";
+    var states = new List<SelectListItem>
+    {
+        new("Choose State", ""), new("New Jersey", "New Jersey"), new("New York", "New York"),
+        new("California", "California"), new("Texas", "Texas")
+    };
+    var countries = new List<SelectListItem>
+    {
+        new("Choose Country", ""), new("United States", "United States"), new("Canada", "Canada"),
+        new("United Kingdom", "United Kingdom")
+    };
+    var cardTypes = new List<SelectListItem>
+    {
+        new("Select Card Type", ""), new("Visa", "Visa"), new("MasterCard", "MasterCard"), new("Amex", "Amex")
+    };
 }
 
-<h2>@ViewData["Title"]</h2>
+@* <h2>@ViewData["Title"]</h2> *@
+
+@* @if (!ViewData.ModelState.IsValid) *@
+@* { *@
+@*     <div class="alert alert-danger"> *@
+@*         <strong>Form has errors:</strong> *@
+@*         <ul> *@
+@*             @foreach (var modelState in ViewData.ModelState) *@
+@*             { *@
+@*                 if (modelState.Value.Errors.Count > 0) *@
+@*                 { *@
+@*                     <li><strong>@modelState.Key:</strong> @modelState.Value.Errors[0].ErrorMessage</li> *@
+@*                 } *@
+@*             } *@
+@*         </ul> *@
+@*     </div> *@
+}
 
 <form asp-action="Create" method="post">
     <div class="row mb-3">
@@ -19,18 +50,9 @@
             <span asp-validation-for="SecurityCode" class="text-danger"></span>
         </div>
         <div class="col-md-3">
-            <label asp-for="CardType" class="form-label"></label>
-            <select asp-for="CardType" class="form-select">
-                <option>Visa</option>
-                <option>MasterCard</option>
-                <option>Amex</option>
-            </select>
-            @* <span asp-validation-for="CardType" class="text-danger"></span>
             <label asp-for="CardType" class="form-label">Card Type</label>
-            <select asp-for="CardType" class="form-select" asp-items="Html.GetEnumSelectList<CardType>()">
-                <option value="">Select Card Type</option>
-            </select>
-            <span asp-validation-for="CardType" class="text-danger"></span> *@
+            <select asp-for="CardType" class="form-select" asp-items="cardTypes"></select>
+            <span asp-validation-for="CardType" class="text-danger"></span>
         </div>
     </div>
 
@@ -64,7 +86,7 @@
     <div class="row mb-3">
         <div class="col-md-4">
             <label asp-for="BillingState" class="form-label">State</label>
-            <input asp-for="BillingState" class="form-control" />
+            <select asp-for="BillingState" class="form-select" asp-items="states"></select>
             <span asp-validation-for="BillingState" class="text-danger"></span>
         </div>
         <div class="col-md-4">
@@ -74,7 +96,7 @@
         </div>
         <div class="col-md-4">
             <label asp-for="BillingCountry" class="form-label">Country</label>
-            <input asp-for="BillingCountry" class="form-control" />
+            <select asp-for="BillingCountry" class="form-select" asp-items="countries"></select>
             <span asp-validation-for="BillingCountry" class="text-danger"></span>
         </div>
     </div>

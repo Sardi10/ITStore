@@ -38,19 +38,29 @@ namespace NewarkITStore.Controllers
         // POST: CreditCard/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(CreditCard card)
+        public async Task<IActionResult> Create(CreditCard creditCard)
         {
+            ModelState.Remove("UserId");
+            ModelState.Remove("User");
+
             if (ModelState.IsValid)
             {
+                // Assign the current user
                 var user = await _userManager.GetUserAsync(User);
-                card.UserId = user.Id;
+                if (user == null)
+                {
+                    return Challenge(); // or redirect to login
+                }
 
-                _context.Add(card);
+                creditCard.UserId = user.Id;
+                creditCard.User = user;
+
+                _context.Add(creditCard);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
 
-            return View(card);
+            return View(creditCard);
         }
 
         // GET: CreditCard/Edit/5

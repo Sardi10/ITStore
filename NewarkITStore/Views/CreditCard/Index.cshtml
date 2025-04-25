@@ -1,0 +1,42 @@
+﻿@model IEnumerable<NewarkITStore.Models.CreditCard>
+@{
+    ViewData["Title"] = "My Credit Cards";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<a class="btn btn-success mb-3" asp-action="Create">+ Add New Card</a>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">You don't have any credit cards saved.</div>
+}
+else
+{
+    <table class="table table-bordered table-striped">
+        <thead class="table-light">
+            <tr>
+                <th>Card Number</th>
+                <th>Type</th>
+                <th>Name</th>
+                <th>Expires</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var card in Model)
+            {
+                <tr>
+                    <td>**** **** **** @card.CardNumber[^4..]</td>
+                    <td>@card.CardType</td>
+                    <td>@card.CardHolderName</td>
+                    <td>@card.ExpiryDate.ToString("MM/yyyy")</td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@card.CreditCardId" class="btn btn-sm btn-outline-primary">Edit</a>
+                        <a asp-action="Delete" asp-route-id="@card.CreditCardId" class="btn btn-sm btn-outline-danger ms-2">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

@@ -105,6 +105,25 @@ namespace NewarkITStore.Controllers
             return View(card);
         }
 
+        // GET: CreditCard/Details/5
+        public async Task<IActionResult> Details(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var creditCard = await _context.CreditCards
+                .FirstOrDefaultAsync(c => c.CreditCardId == id);
+
+            if (creditCard == null)
+            {
+                return NotFound();
+            }
+
+            return View(creditCard);
+        }
+
         // GET: CreditCard/Delete/5
         public async Task<IActionResult> Delete(int id)
         {

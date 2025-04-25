@@ -1,0 +1,22 @@
+﻿@model NewarkITStore.Models.ShippingAddress
+@{
+    ViewData["Title"] = "Shipping Address Details";
+}
+
+<h2>Shipping Address Details</h2>
+
+<dl class="row">
+    <dt class="col-sm-3">Name</dt>
+    <dd class="col-sm-9">@Model.AddressName</dd>
+    <dt class="col-sm-3">Street</dt>
+    <dd class="col-sm-9">@Model.Street @Model.StreetNumber</dd>
+    <dt class="col-sm-3">City</dt>
+    <dd class="col-sm-9">@Model.City</dd>
+    <dt class="col-sm-3">ZIP</dt>
+    <dd class="col-sm-9">@Model.Zip</dd>
+    <dt class="col-sm-3">Country</dt>
+    <dd class="col-sm-9">@Model.Country</dd>
+</dl>
+
+@* <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Edit</a> *@
+<a asp-action="Index" class="btn btn-secondary col-md-2 col-md-4 d-flex align-items-center justify-content-center">Back</a>

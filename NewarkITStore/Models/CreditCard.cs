@@ -23,8 +23,22 @@ namespace NewarkITStore.Models
         public string CardHolderName { get; set; }
 
         [Required]
-        [Display(Name = "Billing Address")]
-        public string BillingAddress { get; set; }
+        [Display(Name = "Street Address")]
+        public string BillingStreet { get; set; }
+
+        [Required]
+        public string BillingCity { get; set; }
+
+        public string? BillingState { get; set; }
+
+        [Required]
+        public string BillingCountry { get; set; }
+
+        [Required]
+        [Display(Name = "ZIP Code")]
+        [RegularExpression(@"^\d{5}(-\d{4})?$", ErrorMessage = "Enter a valid ZIP code.")]
+        public string BillingZip { get; set; }
+
 
         [Required]
         [Display(Name = "Card Type")]

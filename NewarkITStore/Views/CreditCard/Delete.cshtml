@@ -1,0 +1,32 @@
+﻿@model NewarkITStore.Models.CreditCard
+
+@{
+    ViewData["Title"] = "Delete Credit Card";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<h4>Are you sure you want to delete this credit card?</h4>
+<div class="card p-3">
+    <dl class="row">
+        <dt class="col-sm-3">Card Number</dt>
+        <dd class="col-sm-9">@Model.CardNumber</dd>
+
+        <dt class="col-sm-3">Card Type</dt>
+        <dd class="col-sm-9">@Model.CardType</dd>
+
+        <dt class="col-sm-3">Name on Card</dt>
+        <dd class="col-sm-9">@Model.CardHolderName</dd>
+
+        <dt class="col-sm-3">Billing Address</dt>
+        <dd class="col-sm-9">
+            @Model.BillingStreet, @Model.BillingCity, @Model.BillingState, @Model.BillingZip, @Model.BillingCountry
+        </dd>
+    </dl>
+
+    <form asp-action="Delete">
+        <input type="hidden" asp-for="CreditCardId" />
+        <button type="submit" class="btn btn-danger">Delete</button>
+        <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>

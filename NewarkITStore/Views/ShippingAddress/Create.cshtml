@@ -1,0 +1,74 @@
+﻿@model NewarkITStore.Models.ShippingAddress
+@using Microsoft.AspNetCore.Mvc.Rendering
+
+@{
+    ViewData["Title"] = "Add Shipping Address";
+
+    var countries = new List<SelectListItem> {
+        new("Choose Country", ""), new("United States", "United States"),
+        new("Canada", "Canada"), new("United Kingdom", "United Kingdom"), new("Germany", "Germany")
+    };
+
+    var states = new List<SelectListItem> {
+        new("Choose State", ""), new("New York", "New York"),
+        new("New Jersey", "New Jersey"), new("California", "California"), new("Texas", "Texas")
+    };
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<form asp-action="Create" method="post">
+    <div class="mb-3">
+        <label asp-for="AddressName" class="form-label">Address Name</label>
+        <input asp-for="AddressName" class="form-control" />
+        <span asp-validation-for="AddressName" class="text-danger"></span>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-md-8">
+            <label asp-for="Street" class="form-label">Street</label>
+            <input asp-for="Street" class="form-control" />
+            <span asp-validation-for="Street" class="text-danger"></span>
+        </div>
+        <div class="col-md-4">
+            <label asp-for="StreetNumber" class="form-label">Street Number</label>
+            <input asp-for="StreetNumber" class="form-control" />
+            <span asp-validation-for="StreetNumber" class="text-danger"></span>
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="City" class="form-label">City</label>
+        <input asp-for="City" class="form-control" />
+        <span asp-validation-for="City" class="text-danger"></span>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <label asp-for="State" class="form-label">State</label>
+            <select asp-for="State" class="form-select" asp-items="states"></select>
+            <span asp-validation-for="State" class="text-danger"></span>
+        </div>
+        <div class="col-md-4">
+            <label asp-for="Zip" class="form-label">ZIP Code</label>
+            <input asp-for="Zip" class="form-control" />
+            <span asp-validation-for="Zip" class="text-danger"></span>
+        </div>
+        <div class="col-md-4">
+            <label asp-for="Country" class="form-label">Country</label>
+            <select asp-for="Country" class="form-select" asp-items="countries"></select>
+            <span asp-validation-for="Country" class="text-danger"></span>
+        </div>
+    </div>
+
+    <div class="text-end">
+        <button type="submit" class="btn btn-primary">Save Address</button>
+        <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+    </div>
+</form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

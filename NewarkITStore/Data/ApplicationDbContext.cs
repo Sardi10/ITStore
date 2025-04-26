@@ -35,5 +35,12 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         modelBuilder.Entity<BasketItem>()
             .Property(b => b.PricePerUnit)
             .HasPrecision(18, 2);
+
+        modelBuilder.Entity<Order>()
+           .HasOne(o => o.ShippingAddress)
+           .WithMany()
+           .HasForeignKey(o => o.ShippingAddressId)
+           .OnDelete(DeleteBehavior.Restrict); // prevents cascade delete
     }
+
 }

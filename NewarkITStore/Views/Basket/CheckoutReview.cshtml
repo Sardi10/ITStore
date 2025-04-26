@@ -1,25 +1,27 @@
-﻿@model IEnumerable<NewarkITStore.Models.BasketItem>
+﻿@* @model IEnumerable<NewarkITStore.Models.BasketItem> *@
+@model NewarkITStore.ViewModels.CheckoutViewModel
+
 
 @{
     ViewData["Title"] = "Review & Payment";
-    var subtotal = Model.Sum(i => i.Quantity * i.PricePerUnit);
+    var subtotal = Model.BasketItems.Sum(i => i.Quantity * i.PricePerUnit);
     var tax = subtotal * 0.10m;
     var total = subtotal + tax;
 }
 
-<h2>Review Your Order</h2>
+<h2 class="mb-4">Review Your Order</h2>
 
-<table class="table">
-    <thead>
+<table class="table table-bordered">
+    <thead class="table-light">
         <tr>
             <th>Product</th>
             <th>Qty</th>
-            <th>Price</th>
+            <th>Unit Price</th>
             <th>Total</th>
         </tr>
     </thead>
     <tbody>
-        @foreach (var item in Model)
+        @foreach (var item in Model.BasketItems)
         {
             <tr>
                 <td>@item.Product.Name</td>
@@ -31,36 +33,83 @@
     </tbody>
 </table>
 
-<h4 class="text-end">Total: <strong>@total.ToString("C")</strong></h4>
+<h4 class="text-end">Subtotal: @subtotal.ToString("C")</h4>
+<h4 class="text-end">Tax (10%): @tax.ToString("C")</h4>
+<h3 class="text-end text-success">Total: <strong>@total.ToString("C")</strong></h3>
 
 <hr />
-<h3>Payment Info</h3>
+<h3>Shipping Address</h3>
 
 <form asp-action="Checkout" method="post">
     @Html.AntiForgeryToken()
 
+    <div class="mb-4">
+        <label class="form-label">Select a Shipping Address</label>
+        <select name="ShippingAddressId" class="form-select" required>
+            <option value="">-- Choose Address --</option>
+            @foreach (var address in Model.ShippingAddresses)
+            {
+                <option value="@address.Id">
+                    @address.AddressName - @address.Street, @address.City, @address.Country
+                </option>
+            }
+        </select>
+    </div>
+
+    <h4>Select a Credit Card</h4>
     <div class="mb-3">
-        <label class="form-label">Cardholder Name</label>
-        <input type="text" name="CardholderName" class="form-control" required />
+        <select class="form-select" name="SavedCardId" id="savedCardId" onchange="toggleCardInputs(this.value)">
+            <option value="">-- Use New Card --</option>
+            @foreach (var card in Model.SavedCards)
+            {
+                <option value="@card.CreditCardId">**** **** **** @card.CardNumber.Substring(card.CardNumber.Length - 4)</option>
+            }
+        </select>
     </div>
 
-    <div class="mb-3">
-        <label class="form-label">Card Number</label>
-        <input type="text" name="CardNumber" class="form-control" maxlength="16" required />
-    </div>
-
-    <div class="row">
-        <div class="col-md-6 mb-3">
-            <label class="form-label">Expiration Date</label>
-            <input type="text" name="Expiration" class="form-control" placeholder="MM/YY" required />
+    <div id="newCardInputs">
+        <div class="mb-3">
+            <label class="form-label">Cardholder Name</label>
+            <input type="text" name="CardholderName" class="form-control" />
         </div>
-        <div class="col-md-6 mb-3">
-            <label class="form-label">CVV</label>
-            <input type="text" name="CVV" class="form-control" maxlength="4" required />
+        <div class="mb-3">
+            <label class="form-label">Card Number</label>
+            <input type="text" name="CardNumber" class="form-control" maxlength="16" />
+        </div>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Expiration Date</label>
+                <input type="text" name="Expiration" class="form-control" placeholder="MM/YY" />
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">CVV</label>
+                <input type="text" name="CVV" class="form-control" maxlength="4" />
+            </div>
         </div>
     </div>
-
     <div class="text-end mb-5">
-    <button type="submit" class="btn btn-success mt-3">Pay & Place Order</button>
-</div>
+        <button type="submit" class="btn btn-success mt-3">Pay & Place Order</button>
+    </div>
+
 </form>
+
+    @section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+        @* <partial name="_ValidationScriptsPartial" /> *@
+
+        <script>
+            function toggleCardInputs(cardId) {
+                const showInputs = cardId === "";
+                document.getElementById("newCardInputs").style.display = showInputs ? "block" : "none";
+            }
+        </script>
+    }
+
+
+@* @section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+} *@
+
+    

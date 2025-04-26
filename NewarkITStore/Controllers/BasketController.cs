@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NewarkITStore.Data;
 using NewarkITStore.Models;
+using NewarkITStore.ViewModels;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -117,9 +118,10 @@ namespace NewarkITStore.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Checkout(string CardholderName, string CardNumber, string Expiration, string CVV)
+        public async Task<IActionResult> Checkout(string CardholderName, string CardNumber, string Expiration, string CVV, int ShippingAddressId)
         {
             var userId = _userManager.GetUserId(User);
+
             var basketItems = await _context.BasketItems
                 .Include(b => b.Product)
                 .Where(b => b.UserId == userId)
@@ -131,13 +133,10 @@ namespace NewarkITStore.Controllers
                 return RedirectToAction("Index");
             }
 
-            // Log or use fake card data (optional)
-            Console.WriteLine($"Fake payment processed for {CardholderName}, card: {CardNumber}");
-
-            // Create order
             var order = new Order
             {
                 UserId = userId,
+                ShippingAddressId = ShippingAddressId,
                 OrderDate = DateTime.Now,
                 TotalAmount = basketItems.Sum(i => i.PricePerUnit * i.Quantity),
                 OrderItems = basketItems.Select(item => new OrderItem
@@ -150,12 +149,12 @@ namespace NewarkITStore.Controllers
 
             _context.Orders.Add(order);
             _context.BasketItems.RemoveRange(basketItems);
-
             await _context.SaveChangesAsync();
 
             TempData["Success"] = "Order placed successfully!";
             return RedirectToAction("OrderConfirmation", new { orderId = order.OrderId });
         }
+
 
 
         public async Task<IActionResult> OrderConfirmation(int orderId)
@@ -189,9 +188,18 @@ namespace NewarkITStore.Controllers
         public async Task<IActionResult> CheckoutReview()
         {
             var userId = _userManager.GetUserId(User);
+
             var basketItems = await _context.BasketItems
                 .Include(b => b.Product)
                 .Where(b => b.UserId == userId)
+                .ToListAsync();
+
+            var addresses = await _context.ShippingAddresses
+                .Where(a => a.UserId == userId)
+                .ToListAsync();
+
+            var cards = await _context.CreditCards
+                .Where(c => c.UserId == userId)
                 .ToListAsync();
 
             if (!basketItems.Any())
@@ -200,8 +208,14 @@ namespace NewarkITStore.Controllers
                 return RedirectToAction("Index");
             }
 
-            return View(basketItems);
+            return View(new CheckoutViewModel
+            {
+                BasketItems = basketItems,
+                ShippingAddresses = addresses,
+                SavedCards = cards
+            });
         }
+
 
     }
 }

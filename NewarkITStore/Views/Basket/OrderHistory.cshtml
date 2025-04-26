@@ -1,39 +1,74 @@
 ﻿@model IEnumerable<NewarkITStore.Models.Order>
-
 @{
     ViewData["Title"] = "Order History";
 }
 
 <h2>Order History</h2>
 
+<form method="get" class="row mb-4">
+    <div class="col-md-3">
+        <input type="text" name="searchProduct" class="form-control" placeholder="Search by Product Name" value="@Context.Request.Query["searchProduct"]" />
+    </div>
+    <div class="col-md-3">
+        <input type="date" name="startDate" class="form-control" value="@Context.Request.Query["startDate"]" />
+    </div>
+    <div class="col-md-3">
+        <input type="date" name="endDate" class="form-control" value="@Context.Request.Query["endDate"]" />
+    </div>
+    <div class="col-md-3">
+        <button type="submit" class="btn btn-primary w-100">Search</button>
+    </div>
+</form>
+
 @foreach (var order in Model)
 {
-    <div class="card mb-4">
-        <div class="card-header">
-            <strong>Order #: @order.OrderId</strong> - @order.OrderDate.ToShortDateString()
-        </div>
-        <div class="card-body">
-            <table class="table">
-                <thead>
+    <div class="card mb-4 p-3">
+        <h5>
+            <strong>Order #: </strong>@order.OrderId - <span class="text-muted">@order.OrderDate.ToShortDateString()</span>
+        </h5>
+
+        <p><strong>Status:</strong> @order.Status</p>
+
+        <p>
+            <strong>Shipping Address:</strong>
+            @order.ShippingAddress?.AddressName - @order.ShippingAddress?.Street, @order.ShippingAddress?.City, @order.ShippingAddress?.Country
+        </p>
+
+        <p>
+            <strong>Paid with:</strong>
+            @if (order.CreditCard != null)
+            {
+                <text>**** **** **** @order.CreditCard.CardNumber.Substring(order.CreditCard.CardNumber.Length - 4)</text>
+            }
+            else
+            {
+                <text>N/A</text>
+            }
+        </p>
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Qty</th>
+                    <th>Price</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in order.OrderItems)
+                {
                     <tr>
-                        <th>Product</th>
-                        <th>Qty</th>
-                        <th>Price</th>
-                        <th>Total</th>
+                        <td>@item.Product.Name</td>
+                        <td>@item.Quantity</td>
+                        <td>@item.PricePerUnit.ToString("C")</td>
+                        <td>@((item.Quantity * item.PricePerUnit).ToString("C"))</td>
                     </tr>
-                </thead>
-                <tbody>
-                    @foreach (var item in order.OrderItems)
-                    {
-                        <tr>
-                            <td>@item.Product.Name</td>
-                            <td>@item.Quantity</td>
-                            <td>@item.PricePerUnit.ToString("C")</td>
-                            <td>@((item.Quantity * item.PricePerUnit).ToString("C"))</td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+                }
+            </tbody>
+        </table>
+
+        <div class="text-end">
             <strong>Total: @order.TotalAmount.ToString("C")</strong>
         </div>
     </div>

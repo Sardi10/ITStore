@@ -132,12 +132,19 @@ namespace NewarkITStore.Controllers
                 TempData["Error"] = "Your cart is empty.";
                 return RedirectToAction("Index");
             }
+            
+            int? savedCardId = null;
+            if (int.TryParse(Request.Form["SavedCardId"], out var parsedId) && parsedId > 0)
+            {
+                savedCardId = parsedId;
+            }
 
             var order = new Order
             {
                 UserId = userId,
                 ShippingAddressId = ShippingAddressId,
                 OrderDate = DateTime.Now,
+                CreditCardId = savedCardId,
                 TotalAmount = basketItems.Sum(i => i.PricePerUnit * i.Quantity),
                 OrderItems = basketItems.Select(item => new OrderItem
                 {
@@ -171,18 +178,41 @@ namespace NewarkITStore.Controllers
         }
 
         [Authorize]
-        public async Task<IActionResult> OrderHistory()
+        public async Task<IActionResult> OrderHistory(string searchCustomer, string searchProduct, DateTime? startDate, DateTime? endDate)
         {
             var userId = _userManager.GetUserId(User);
-            var orders = await _context.Orders
+
+            var ordersQuery = _context.Orders
                 .Where(o => o.UserId == userId)
                 .Include(o => o.OrderItems)
                     .ThenInclude(oi => oi.Product)
+                .Include(o => o.ShippingAddress)
+                .Include(o => o.CreditCard)
+                .OrderByDescending(o => o.OrderDate)
+                .AsQueryable();
+
+            if (!string.IsNullOrEmpty(searchProduct))
+            {
+                ordersQuery = ordersQuery.Where(o => o.OrderItems.Any(oi => oi.Product.Name.Contains(searchProduct)));
+            }
+
+            if (startDate.HasValue)
+            {
+                ordersQuery = ordersQuery.Where(o => o.OrderDate >= startDate.Value);
+            }
+
+            if (endDate.HasValue)
+            {
+                ordersQuery = ordersQuery.Where(o => o.OrderDate <= endDate.Value);
+            }
+
+            var orders = await ordersQuery
                 .OrderByDescending(o => o.OrderDate)
                 .ToListAsync();
 
             return View(orders);
         }
+
 
         [HttpGet]
         public async Task<IActionResult> CheckoutReview()

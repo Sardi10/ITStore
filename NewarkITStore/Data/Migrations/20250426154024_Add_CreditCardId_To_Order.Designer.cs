@@ -12,8 +12,8 @@ using NewarkITStore.Data;
 namespace NewarkITStore.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250426122150_FixShippingAddressFK")]
-    partial class FixShippingAddressFK
+    [Migration("20250426154024_Add_CreditCardId_To_Order")]
+    partial class Add_CreditCardId_To_Order
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -337,10 +337,13 @@ namespace NewarkITStore.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OrderId"));
 
+                    b.Property<int?>("CreditCardId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("OrderDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("ShippingAddressId")
+                    b.Property<int?>("ShippingAddressId")
                         .HasColumnType("int");
 
                     b.Property<int>("Status")
@@ -354,6 +357,8 @@ namespace NewarkITStore.Data.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("OrderId");
+
+                    b.HasIndex("CreditCardId");
 
                     b.HasIndex("ShippingAddressId");
 
@@ -579,17 +584,22 @@ namespace NewarkITStore.Data.Migrations
 
             modelBuilder.Entity("NewarkITStore.Models.Order", b =>
                 {
+                    b.HasOne("NewarkITStore.Models.CreditCard", "CreditCard")
+                        .WithMany()
+                        .HasForeignKey("CreditCardId");
+
                     b.HasOne("NewarkITStore.Models.ShippingAddress", "ShippingAddress")
                         .WithMany()
                         .HasForeignKey("ShippingAddressId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("NewarkITStore.Models.ApplicationUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("CreditCard");
 
                     b.Navigation("ShippingAddress");
 

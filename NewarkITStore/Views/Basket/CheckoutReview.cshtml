@@ -1,43 +1,61 @@
-﻿@model IEnumerable<NewarkITStore.Models.BasketItem>
+﻿@* @model IEnumerable<NewarkITStore.Models.BasketItem> *@
+@model NewarkITStore.ViewModels.CheckoutViewModel
 
 @{
     ViewData["Title"] = "Review & Payment";
-    var subtotal = Model.Sum(i => i.Quantity * i.PricePerUnit);
+    var subtotal = Model.BasketItems.Sum(i => i.Quantity * i.PricePerUnit);
     var tax = subtotal * 0.10m;
     var total = subtotal + tax;
 }
 
-<h2>Review Your Order</h2>
+<h2 class="mb-4">Review Your Order</h2>
 
-<table class="table">
-    <thead>
+<table class="table table-bordered">
+    <thead class="table-light">
         <tr>
             <th>Product</th>
             <th>Qty</th>
-            <th>Price</th>
+            <th>Unit Price</th>
             <th>Total</th>
         </tr>
     </thead>
     <tbody>
-        @foreach (var item in Model)
+        @foreach (var item in Model.BasketItems)
         {
             <tr>
                 <td>@item.Product.Name</td>
                 <td>@item.Quantity</td>
                 <td>@item.PricePerUnit.ToString("C")</td>
-                <td>@((item.Quantity * item.PricePerUnit).ToString("C"))</td>
+                <td>@(item.Quantity * item.PricePerUnit).ToString("C")</td>
             </tr>
         }
     </tbody>
 </table>
 
-<h4 class="text-end">Total: <strong>@total.ToString("C")</strong></h4>
+<h4 class="text-end">Subtotal: @subtotal.ToString("C")</h4>
+<h4 class="text-end">Tax (10%): @tax.ToString("C")</h4>
+<h3 class="text-end text-success">Total: <strong>@total.ToString("C")</strong></h3>
 
 <hr />
-<h3>Payment Info</h3>
+<h3>Shipping Address</h3>
 
 <form asp-action="Checkout" method="post">
     @Html.AntiForgeryToken()
+
+    <div class="mb-4">
+        <label class="form-label">Select a Shipping Address</label>
+        <select name="ShippingAddressId" class="form-select" required>
+            <option value="">-- Choose Address --</option>
+            @foreach (var address in Model.ShippingAddresses)
+            {
+                <option value="@address.Id">
+                    @address.AddressName - @address.Street, @address.City, @address.Country
+                </option>
+            }
+        </select>
+    </div>
+
+    <h3>Payment Info</h3>
 
     <div class="mb-3">
         <label class="form-label">Cardholder Name</label>
@@ -60,7 +78,11 @@
         </div>
     </div>
 
-    <div class="text-end mb-5">
-    <button type="submit" class="btn btn-success mt-3">Pay & Place Order</button>
-</div>
+    <div class="text-end">
+        <button type="submit" class="btn btn-success mt-3">Pay & Place Order</button>
+    </div>
 </form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

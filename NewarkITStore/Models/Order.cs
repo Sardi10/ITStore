@@ -15,6 +15,12 @@ namespace NewarkITStore.Models
         public decimal TotalAmount { get; set; }
         public enum OrderStatus { Pending, Shipped, Delivered, Cancelled }
         public OrderStatus Status { get; set; } = OrderStatus.Pending;
+        public int? ShippingAddressId { get; set; }  // Nullable to match SQL
+
+        [ForeignKey("ShippingAddressId")]
+        public ShippingAddress? ShippingAddress { get; set; }
+
+
 
         [ForeignKey("UserId")]
         public ApplicationUser User { get; set; }

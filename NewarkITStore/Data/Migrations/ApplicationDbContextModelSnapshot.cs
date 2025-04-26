@@ -334,6 +334,9 @@ namespace NewarkITStore.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OrderId"));
 
+                    b.Property<int?>("CreditCardId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("OrderDate")
                         .HasColumnType("datetime2");
 
@@ -351,6 +354,8 @@ namespace NewarkITStore.Data.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("OrderId");
+
+                    b.HasIndex("CreditCardId");
 
                     b.HasIndex("ShippingAddressId");
 
@@ -576,6 +581,10 @@ namespace NewarkITStore.Data.Migrations
 
             modelBuilder.Entity("NewarkITStore.Models.Order", b =>
                 {
+                    b.HasOne("NewarkITStore.Models.CreditCard", "CreditCard")
+                        .WithMany()
+                        .HasForeignKey("CreditCardId");
+
                     b.HasOne("NewarkITStore.Models.ShippingAddress", "ShippingAddress")
                         .WithMany()
                         .HasForeignKey("ShippingAddressId")
@@ -586,6 +595,8 @@ namespace NewarkITStore.Data.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("CreditCard");
 
                     b.Navigation("ShippingAddress");
 

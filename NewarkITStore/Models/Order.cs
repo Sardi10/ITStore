@@ -19,8 +19,10 @@ namespace NewarkITStore.Models
 
         [ForeignKey("ShippingAddressId")]
         public ShippingAddress? ShippingAddress { get; set; }
+        public int? CreditCardId { get; set; }
 
-
+        [ForeignKey("CreditCardId")]
+        public CreditCard? CreditCard { get; set; }
 
         [ForeignKey("UserId")]
         public ApplicationUser User { get; set; }

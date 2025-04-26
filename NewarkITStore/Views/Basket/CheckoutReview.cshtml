@@ -1,6 +1,7 @@
 ﻿@* @model IEnumerable<NewarkITStore.Models.BasketItem> *@
 @model NewarkITStore.ViewModels.CheckoutViewModel
 
+
 @{
     ViewData["Title"] = "Review & Payment";
     var subtotal = Model.BasketItems.Sum(i => i.Quantity * i.PricePerUnit);
@@ -26,7 +27,7 @@
                 <td>@item.Product.Name</td>
                 <td>@item.Quantity</td>
                 <td>@item.PricePerUnit.ToString("C")</td>
-                <td>@(item.Quantity * item.PricePerUnit).ToString("C")</td>
+                <td>@((item.Quantity * item.PricePerUnit).ToString("C"))</td>
             </tr>
         }
     </tbody>
@@ -55,34 +56,60 @@
         </select>
     </div>
 
-    <h3>Payment Info</h3>
-
+    <h4>Select a Credit Card</h4>
     <div class="mb-3">
-        <label class="form-label">Cardholder Name</label>
-        <input type="text" name="CardholderName" class="form-control" required />
+        <select class="form-select" name="SavedCardId" id="savedCardId" onchange="toggleCardInputs(this.value)">
+            <option value="">-- Use New Card --</option>
+            @foreach (var card in Model.SavedCards)
+            {
+                <option value="@card.CreditCardId">**** **** **** @card.CardNumber.Substring(card.CardNumber.Length - 4)</option>
+            }
+        </select>
     </div>
 
-    <div class="mb-3">
-        <label class="form-label">Card Number</label>
-        <input type="text" name="CardNumber" class="form-control" maxlength="16" required />
-    </div>
-
-    <div class="row">
-        <div class="col-md-6 mb-3">
-            <label class="form-label">Expiration Date</label>
-            <input type="text" name="Expiration" class="form-control" placeholder="MM/YY" required />
+    <div id="newCardInputs">
+        <div class="mb-3">
+            <label class="form-label">Cardholder Name</label>
+            <input type="text" name="CardholderName" class="form-control" />
         </div>
-        <div class="col-md-6 mb-3">
-            <label class="form-label">CVV</label>
-            <input type="text" name="CVV" class="form-control" maxlength="4" required />
+        <div class="mb-3">
+            <label class="form-label">Card Number</label>
+            <input type="text" name="CardNumber" class="form-control" maxlength="16" />
+        </div>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Expiration Date</label>
+                <input type="text" name="Expiration" class="form-control" placeholder="MM/YY" />
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">CVV</label>
+                <input type="text" name="CVV" class="form-control" maxlength="4" />
+            </div>
         </div>
     </div>
-
-    <div class="text-end">
+    <div class="text-end mb-5">
         <button type="submit" class="btn btn-success mt-3">Pay & Place Order</button>
     </div>
+
 </form>
 
-@section Scripts {
+    @section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+        @* <partial name="_ValidationScriptsPartial" /> *@
+
+        <script>
+            function toggleCardInputs(cardId) {
+                const showInputs = cardId === "";
+                document.getElementById("newCardInputs").style.display = showInputs ? "block" : "none";
+            }
+        </script>
+    }
+
+
+@* @section Scripts {
     <partial name="_ValidationScriptsPartial" />
-}
+} *@
+
+    

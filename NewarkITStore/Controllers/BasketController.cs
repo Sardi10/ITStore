@@ -198,6 +198,10 @@ namespace NewarkITStore.Controllers
                 .Where(a => a.UserId == userId)
                 .ToListAsync();
 
+            var cards = await _context.CreditCards
+                .Where(c => c.UserId == userId)
+                .ToListAsync();
+
             if (!basketItems.Any())
             {
                 TempData["Error"] = "Your cart is empty.";
@@ -207,7 +211,8 @@ namespace NewarkITStore.Controllers
             return View(new CheckoutViewModel
             {
                 BasketItems = basketItems,
-                ShippingAddresses = addresses
+                ShippingAddresses = addresses,
+                SavedCards = cards
             });
         }
 

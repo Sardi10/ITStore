@@ -32,10 +32,17 @@
         <span asp-validation-for="DateOfBirth" class="text-danger small"></span>
     </div>
 
+    @* <div class="mb-3"> *@
+    @*     <label class="form-label">Upload New Profile Picture</label> *@
+    @*     <input type="file" name="ProfilePictureFile" class="form-control form-control-sm" /> *@
+    @* </div> *@
+
     <div class="mb-3">
         <label class="form-label">Upload New Profile Picture</label>
-        <input type="file" name="ProfilePictureFile" class="form-control form-control-sm" />
+        <input type="file" name="ProfilePictureFile" class="form-control form-control-sm" accept="image/*" onchange="previewImage(event)" />
+        <img id="preview" class="mt-2" style="max-width: 150px; display: none;" />
     </div>
+
 
     @if (User.IsInRole("Admin"))
     {
@@ -61,4 +68,20 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+
+    <script>
+        function previewImage(event) {
+            const preview = document.getElementById('preview');
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+    </script>
+
 }

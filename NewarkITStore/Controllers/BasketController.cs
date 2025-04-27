@@ -163,6 +163,10 @@ namespace NewarkITStore.Controllers
                 await _context.SaveChangesAsync(); // Needed to generate the ID
                 selectedCardId = newCard.CreditCardId;
             }
+            var subtotal = basketItems.Sum(i => i.PricePerUnit * i.Quantity);
+            var tax = subtotal * 0.10m;
+            var total = subtotal + tax;
+
 
             var order = new Order
             {
@@ -170,7 +174,7 @@ namespace NewarkITStore.Controllers
                 OrderDate = DateTime.Now,
                 CreditCardId = selectedCardId,
                 ShippingAddressId = int.TryParse(Request.Form["ShippingAddressId"], out var addrId) ? addrId : null,
-                TotalAmount = basketItems.Sum(i => i.PricePerUnit * i.Quantity * 1.1m), // including 10% tax
+                TotalAmount = total,
                 OrderItems = basketItems.Select(item => new OrderItem
                 {
                     ProductId = item.ProductId,

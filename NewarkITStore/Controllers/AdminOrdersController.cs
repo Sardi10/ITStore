@@ -48,7 +48,14 @@ namespace NewarkITStore.Controllers
                     ProductName = oi.Product.Name,
                     Quantity = oi.Quantity,
                     PricePerUnit = oi.PricePerUnit
-                }).ToList()
+                }).ToList(),
+                ShippingAddressSummary = o.ShippingAddress != null
+                ? $"{o.ShippingAddress.AddressName} - {o.ShippingAddress.Street}, {o.ShippingAddress.City}, {o.ShippingAddress.State},{o.ShippingAddress.Country}, {o.ShippingAddress.Zip}"
+                : "N/A",
+
+                MaskedCard = o.CreditCard != null && !string.IsNullOrEmpty(o.CreditCard.CardNumber)
+                ? $"**** **** **** {o.CreditCard.CardNumber.Substring(o.CreditCard.CardNumber.Length - 4)}"
+                : "N/A"
             }).ToListAsync();
 
             return View(orders);
@@ -60,9 +67,11 @@ namespace NewarkITStore.Controllers
         public async Task<IActionResult> Details(int id)
         {
             var order = await _context.Orders
-                .Include(o => o.OrderItems)
-                    .ThenInclude(oi => oi.Product)
-                .FirstOrDefaultAsync(o => o.OrderId == id);
+        .Include(o => o.OrderItems)
+            .ThenInclude(oi => oi.Product)
+        .Include(o => o.ShippingAddress)
+        .Include(o => o.CreditCard)
+        .FirstOrDefaultAsync(o => o.OrderId == id);
 
             if (order == null)
                 return NotFound();

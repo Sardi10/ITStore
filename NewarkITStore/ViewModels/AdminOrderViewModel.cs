@@ -18,7 +18,7 @@ namespace NewarkITStore.ViewModels
         public string ShippingAddressSummary { get; set; } // e.g., "Home - NYC, NY"
         public string MaskedCard { get; set; } // e.g., "**** **** **** 1234"
         private const decimal TaxRate = 0.10m;
-        public decimal Total => Items.Sum(i => i.PricePerUnit * i.Quantity * TaxRate);
+        public decimal Total => Items.Sum(i => i.PricePerUnit * i.Quantity * (1+TaxRate));
         [ForeignKey("UserId")]
         public ApplicationUser User { get; set; }
     }

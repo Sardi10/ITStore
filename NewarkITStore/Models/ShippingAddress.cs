@@ -22,7 +22,7 @@ namespace NewarkITStore.Models
         public string Street { get; set; }
 
         [Display(Name = "Street Number")]
-        public string StreetNumber { get; set; }
+        public string? StreetNumber { get; set; }
 
         [Required]
         public string City { get; set; }

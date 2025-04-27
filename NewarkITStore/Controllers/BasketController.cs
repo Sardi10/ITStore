@@ -132,20 +132,45 @@ namespace NewarkITStore.Controllers
                 TempData["Error"] = "Your cart is empty.";
                 return RedirectToAction("Index");
             }
-            
-            int? savedCardId = null;
-            if (int.TryParse(Request.Form["SavedCardId"], out var parsedId) && parsedId > 0)
+
+            int? selectedCardId = null;
+            string savedCardIdRaw = Request.Form["SavedCardId"];
+
+            if (!string.IsNullOrEmpty(savedCardIdRaw) && int.TryParse(savedCardIdRaw, out var parsedId) && parsedId > 0)
             {
-                savedCardId = parsedId;
+                // Use selected saved card
+                selectedCardId = parsedId;
+            }
+            else
+            {
+                // Create a new CreditCard record
+                var newCard = new CreditCard
+                {
+                    UserId = userId,
+                    CardNumber = Request.Form["CardNumber"],
+                    SecurityCode = Request.Form["CVV"],
+                    CardHolderName = Request.Form["CardholderName"],
+                    ExpiryDate = DateTime.TryParse(Request.Form["Expiration"], out var expiry) ? expiry : DateTime.UtcNow.AddYears(2),
+                    CardType = Request.Form["CardType"], // Optional: if you're using dropdown for Visa/Amex/etc.
+                    BillingStreet = Request.Form["BillingStreet"],
+                    BillingCity = Request.Form["BillingCity"],
+                    BillingState = Request.Form["BillingState"],
+                    BillingCountry = Request.Form["BillingCountry"],
+                    BillingZip = Request.Form["BillingZip"]
+                };
+
+                _context.CreditCards.Add(newCard);
+                await _context.SaveChangesAsync(); // Needed to generate the ID
+                selectedCardId = newCard.CreditCardId;
             }
 
             var order = new Order
             {
                 UserId = userId,
-                ShippingAddressId = ShippingAddressId,
                 OrderDate = DateTime.Now,
-                CreditCardId = savedCardId,
-                TotalAmount = basketItems.Sum(i => i.PricePerUnit * i.Quantity),
+                CreditCardId = selectedCardId,
+                ShippingAddressId = int.TryParse(Request.Form["ShippingAddressId"], out var addrId) ? addrId : null,
+                TotalAmount = basketItems.Sum(i => i.PricePerUnit * i.Quantity * 1.1m), // including 10% tax
                 OrderItems = basketItems.Select(item => new OrderItem
                 {
                     ProductId = item.ProductId,
@@ -153,6 +178,7 @@ namespace NewarkITStore.Controllers
                     PricePerUnit = item.PricePerUnit
                 }).ToList()
             };
+
 
             _context.Orders.Add(order);
             _context.BasketItems.RemoveRange(basketItems);

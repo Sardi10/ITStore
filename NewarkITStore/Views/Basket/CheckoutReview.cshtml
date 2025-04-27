@@ -7,6 +7,10 @@
     var subtotal = Model.BasketItems.Sum(i => i.Quantity * i.PricePerUnit);
     var tax = subtotal * 0.10m;
     var total = subtotal + tax;
+    var cardTypes = new List<SelectListItem>
+    {
+        new("Visa", "Visa"), new("MasterCard", "MasterCard"), new("Amex", "Amex")
+    };
 }
 
 <h2 class="mb-4">Review Your Order</h2>
@@ -55,7 +59,7 @@
             }
         </select>
     </div>
-
+   
     <h4>Select a Credit Card</h4>
     <div class="mb-3">
         <select class="form-select" name="SavedCardId" id="savedCardId" onchange="toggleCardInputs(this.value)">
@@ -76,6 +80,16 @@
             <label class="form-label">Card Number</label>
             <input type="text" name="CardNumber" class="form-control" maxlength="16" />
         </div>
+        <div class="mb-3">
+            <label class="form-label">Card Type</label>
+            <select class="form-select" name="CardType" >
+                <option value="">-- Select Card Type --</option>
+                @foreach (var card in cardTypes)
+                {
+                    <option value="@card.Value">@card.Text</option>
+                }
+            </select>
+        </div>
         <div class="row">
             <div class="col-md-6 mb-3">
                 <label class="form-label">Expiration Date</label>
@@ -84,6 +98,26 @@
             <div class="col-md-6 mb-3">
                 <label class="form-label">CVV</label>
                 <input type="text" name="CVV" class="form-control" maxlength="4" />
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Billing St</label>
+            <input type="text" name="BillingStreet" class="form-control" />
+        </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Billing City</label>
+                <input type="text" name="BillingCity" class="form-control" />
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Billing State</label>
+                <input type="text" name="BillingState" class="form-control" />
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Billing Country</label>
+                <input type="text" name="BillingCountry" class="form-control" />
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Billing ZIP</label>
+                <input type="text" name="BillingZip" class="form-control" />
             </div>
         </div>
     </div>

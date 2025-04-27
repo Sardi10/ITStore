@@ -35,15 +35,19 @@
         </p>
 
         <p>
-            <strong>Paid with:</strong>
             @if (order.CreditCard != null)
             {
-                <text>**** **** **** @order.CreditCard.CardNumber.Substring(order.CreditCard.CardNumber.Length - 4)</text>
+                var last4 = order.CreditCard.CardNumber?.Length >= 4
+                ? order.CreditCard.CardNumber[^4..]
+                : "XXXX";
+
+            <p><strong>Paid with:</strong> **** **** **** @last4</p>
             }
             else
             {
-                <text>N/A</text>
+            <p><strong>Paid with:</strong> N/A</p>
             }
+
         </p>
 
         <table class="table">

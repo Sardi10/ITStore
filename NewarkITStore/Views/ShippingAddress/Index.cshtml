@@ -6,6 +6,12 @@
 <h2>Your Shipping Addresses</h2>
 <a asp-action="Create" class="btn btn-primary mb-3">+ Add Address</a>
 
+@if (!Model.Any())
+{
+    <div class="alert alert-info">You don't have any credit cards saved.</div>
+}
+else
+{
 <table class="table table-striped">
     <thead>
         <tr>
@@ -35,3 +41,4 @@
         }
     </tbody>
 </table>
+}

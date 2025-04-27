@@ -4,16 +4,43 @@
 
 @{
     ViewData["Title"] = "Order Details";
+    var subtotal = Model.OrderItems.Sum(i => i.PricePerUnit * i.Quantity);
+    var tax = subtotal * 0.10m;
+    var total = subtotal + tax;
 }
 
 <h2>Order #@Model.OrderId</h2>
 <p><strong>Order Date:</strong> @Model.OrderDate.ToShortDateString()</p>
+<p>
+    <strong>Status:</strong>
+    <span class="badge bg-@GetStatusColor(Model.Status)">
+        @Model.Status
+    </span>
+</p>
+
+@if (Model.ShippingAddress != null)
+{
+    <p><strong>Shipping Address:</strong> @Model.ShippingAddress.AddressName - @Model.ShippingAddress.Street, @Model.ShippingAddress.City, @Model.ShippingAddress.State, @Model.ShippingAddress.Country, @Model.ShippingAddress.Zip</p>
+}
+else
+{
+    <p><strong>Shipping Address:</strong> N/A</p>
+}
+
+@if (Model.CreditCard != null && !string.IsNullOrEmpty(Model.CreditCard.CardNumber))
+{
+    <p><strong>Paid with:</strong> **** **** **** @Model.CreditCard.CardNumber.Substring(Model.CreditCard.CardNumber.Length - 4)</p>
+}
+else
+{
+    <p><strong>Paid with:</strong> N/A</p>
+}
 
 <hr />
 
 <h4>Order Items</h4>
 <table class="table table-bordered">
-    <thead>
+    <thead class="table-light">
         <tr>
             <th>Product</th>
             <th>Price</th>
@@ -34,7 +61,11 @@
     </tbody>
 </table>
 
-<p class="text-end"><strong>Order Total:</strong> @Model.OrderItems.Sum(i => i.PricePerUnit * i.Quantity).ToString("C")</p>
+<div class="text-end">
+    <p><strong>Subtotal:</strong> @subtotal.ToString("C")</p>
+    <p><strong>Tax (10%):</strong> @tax.ToString("C")</p>
+    <p class="fs-5 fw-bold"><strong>Total:</strong> @total.ToString("C")</p>
+</div>
 
 <hr />
 
@@ -59,3 +90,17 @@
     <button type="submit" class="btn btn-primary mt-2">Update Status</button>
     <a asp-action="Index" class="btn btn-secondary mt-2">Back to Orders</a>
 </form>
+
+@functions {
+    private string GetStatusColor(OrderStatus status)
+    {
+        return status switch
+        {
+            OrderStatus.Pending => "warning",
+            OrderStatus.Shipped => "info",
+            OrderStatus.Delivered => "success",
+            OrderStatus.Cancelled => "danger",
+            _ => "secondary"
+        };
+    }
+}

@@ -1,10 +1,30 @@
-﻿@model List<NewarkITStore.ViewModels.AdminOrderViewModel>  
+﻿ @model List<NewarkITStore.ViewModels.AdminOrderViewModel>  
 @using NewarkITStore.Models
 @using static NewarkITStore.Models.Order
 
 
 @{
     ViewData["Title"] = "All Orders";
+}
+
+@functions {
+    private string GetOptionColor(OrderStatus status) => status switch
+    {
+        OrderStatus.Pending => "text-warning",
+        OrderStatus.Shipped => "text-info",
+        OrderStatus.Delivered => "text-success",
+        OrderStatus.Cancelled => "text-danger",
+        _ => ""
+    };
+
+    private string GetSelectBorderColor(OrderStatus status) => status switch
+    {
+        OrderStatus.Pending => "border-warning",
+        OrderStatus.Shipped => "border-info",
+        OrderStatus.Delivered => "border-success",
+        OrderStatus.Cancelled => "border-danger",
+        _ => "border-secondary"
+    };
 }
 
 <h2>All Orders</h2>
@@ -55,11 +75,13 @@
     <thead class="table-light">
         <tr>
             <th>Order #</th>
-            <th>User ID</th>
-            <th>Order Date</th>
+            <th>Email</th>
+            <th>Date</th>
+            <th>Shipping Address</th>
+            <th>Paid With</th>
             <th>Status</th>
             <th>Total</th>
-            <th></th>
+            <th>Update</th>
         </tr>
     </thead>
     <tbody>
@@ -69,14 +91,31 @@
                 <td>@order.OrderId</td>
                 <td>@order.UserEmail</td>
                 <td>@order.OrderDate.ToShortDateString()</td>
+                <td>@order.ShippingAddressSummary</td>
+                <td>@order.MaskedCard</td>
                 <td>
-                    <span class="badge bg-@GetStatusColor(order.Status)">
-                        @order.Status
-                    </span>
+                    <form asp-action="UpdateStatus" method="post" class="d-flex">
+                        <input type="hidden" name="id" value="@order.OrderId" />
+
+                        @{
+                            var selectClass = "form-select form-select-sm me-2 " + GetSelectBorderColor(order.Status);
+                        }
+
+                        <select name="newStatus" class="@selectClass">
+                            @foreach (OrderStatus status in Enum.GetValues(typeof(OrderStatus)))
+                            {
+                                var isSelected = order.Status == status ? " selected" : "";
+                                var optionClass = GetOptionColor(status);
+                                @Html.Raw($"<option class=\"{optionClass}\" value=\"{status}\"{isSelected}>{status}</option>")
+                            }
+                        </select>
+
+                        <button type="submit" class="btn btn-sm btn-outline-success">✓</button>
+                    </form>
+
+
                 </td>
-                <td>
-                    @order.Total.ToString("C")
-                </td>
+                <td>@order.Total.ToString("C")</td>
                 <td>
                     <a asp-action="Details" asp-route-id="@order.OrderId" class="btn btn-sm btn-outline-primary">View</a>
                 </td>
@@ -84,6 +123,7 @@
         }
     </tbody>
 </table>
+
 
 @functions {
     private string GetStatusColor(OrderStatus status)

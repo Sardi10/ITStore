@@ -82,22 +82,23 @@
         type: 'bar',
         data: {
             labels: @Html.Raw(Json.Serialize(Model.Select(p => p.ProductName))),
-            datasets: [{
-                label: '@yAxisLabel', // ✨ Dynamic Y axis label
-                data: @Html.Raw(Json.Serialize(
+                datasets: [{
+        label: '@yAxisLabel', // Dynamic Y-axis label
+        data: @Html.Raw(Json.Serialize(
            selectedSortBy == "units"
                ? Model.Select(p => p.UnitsSold)
                : Model.Select(p => p.TotalRevenue)
-                )),
-                backgroundColor: 'rgba(153, 102, 255, 0.6)'
-            }]
+        )),
+        backgroundColor: '@(selectedSortBy == "units" ? "rgba(153, 102, 255, 0.6)" : "rgba(255, 159, 64, 0.6)")'
+    }]
+
         },
         options: {
             responsive: true,
             plugins: {
                 title: {
                     display: true,
-                    text: '@chartTitle' // ✨ Dynamic Chart Title
+                    text: '@chartTitle' // Dynamic Chart Title
                 }
             }
         }

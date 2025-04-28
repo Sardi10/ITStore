@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Globalization;
+using System.Text;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -166,6 +167,40 @@ namespace NewarkITStore.Controllers
             return View(result);
         }
 
+        public async Task<IActionResult> TopSellingProducts(DateTime? startDate, DateTime? endDate, string category, int topN = 10, string sortBy = "revenue")
+        {
+            var query = _context.OrderItems
+            .Include(oi => oi.Product)
+            .Include(oi => oi.Order)
+            .AsQueryable();
+
+            if (startDate.HasValue)
+                query = query.Where(oi => oi.Order.OrderDate >= startDate.Value);
+
+            if (endDate.HasValue)
+                query = query.Where(oi => oi.Order.OrderDate <= endDate.Value.Date.AddDays(1).AddSeconds(-1));
+
+            if (!string.IsNullOrEmpty(category))
+                query = query.Where(oi => oi.Product.ProductType.Name.ToLower().Contains(category.ToLower()));
+
+            var data = await query
+                .GroupBy(oi => oi.Product.Name)
+                .Select(g => new TopProductStatsViewModel
+                {
+                    ProductName = g.Key,
+                    UnitsSold = g.Sum(oi => oi.Quantity),
+                    TotalRevenue = g.Sum(oi => oi.Quantity * oi.PricePerUnit * 1.1m)
+                })
+                .ToListAsync();
+
+            // Sort based on selection
+            data = sortBy.ToLower() == "units"
+                ? data.OrderByDescending(x => x.UnitsSold).Take(topN).ToList()
+                : data.OrderByDescending(x => x.TotalRevenue).Take(topN).ToList();
+
+            return View(data);
+
+        }
 
 
     }

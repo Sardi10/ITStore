@@ -1,0 +1,138 @@
+﻿@model IEnumerable<NewarkITStore.ViewModels.TopProductStatsViewModel>
+
+@{
+    ViewData["Title"] = "Top Selling Products";
+    var topN = Context.Request.Query["topN"].FirstOrDefault() ?? "10";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<form method="get" class="row mb-4">
+    <div class="col-md-2">
+        <label>From</label>
+        <input type="date" name="startDate" class="form-control" value="@Context.Request.Query["startDate"]" />
+    </div>
+    <div class="col-md-2">
+        <label>To</label>
+        <input type="date" name="endDate" class="form-control" value="@Context.Request.Query["endDate"]" />
+    </div>
+    <div class="col-md-4">
+        <label>Product Category</label>
+        <input type="text" name="category" class="form-control" value="@Context.Request.Query["category"]" />
+    </div>
+    <div class="col-md-2">
+        <label>Top N</label>
+        <input type="number" name="topN" class="form-control" value="@topN" />
+    </div>
+    <div class="col-md-2">
+        <label>Sort By</label>
+        <select name="sortBy" class="form-control">
+            <option value="revenue" selected="@(Context.Request.Query["sortBy"] == "units" ? "false" : "true")">Revenue</option>
+            <option value="units" selected="@(Context.Request.Query["sortBy"] == "units" ? "true" : "false")">Units Sold</option>
+        </select>
+    </div>
+
+
+    <div class="col-md-2 mt-4">
+        <button type="submit" class="btn btn-primary mt-2">Filter</button>
+    </div>
+</form>
+
+<canvas id="topProductsChart" height="120"></canvas>
+
+<div class="mt-3">
+    <button id="downloadChartBtn" class="btn btn-outline-primary me-2">Download Chart as Image</button>
+    <button id="downloadCsvBtn" class="btn btn-outline-success me-2">Download CSV</button>
+    <button id="downloadPdfBtn" class="btn btn-outline-danger">Download PDF</button>
+</div>
+
+<table class="table table-bordered mt-4">
+    <thead class="table-light">
+        <tr>
+            <th>Product</th>
+            <th>Units Sold</th>
+            <th>Total Revenue</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var product in Model)
+        {
+            <tr>
+                <td>@product.ProductName</td>
+                <td>@product.UnitsSold</td>
+                <td>@product.TotalRevenue.ToString("C")</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+
+    <script>
+        const ctx = document.getElementById('topProductsChart').getContext('2d');
+        const chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: @Html.Raw(Json.Serialize(Model.Select(p => p.ProductName))),
+                datasets: [{
+                    label: 'Total Revenue',
+                    data: @Html.Raw(Json.Serialize(Model.Select(p => p.TotalRevenue))),
+                    backgroundColor: 'rgba(153, 102, 255, 0.6)'
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Top Selling Products'
+                    }
+                }
+            }
+        });
+
+        document.getElementById('downloadChartBtn').addEventListener('click', function () {
+            const a = document.createElement('a');
+            a.href = chart.toBase64Image();
+            a.download = 'top_products_chart.png';
+            a.click();
+        });
+
+        document.getElementById('downloadCsvBtn').addEventListener('click', function () {
+            const rows = [['Product Name', 'Units Sold', 'Total Revenue']];
+        @foreach (var item in Model)
+        {
+            <text>
+                        rows.push(["@item.ProductName", "@item.UnitsSold", "@item.TotalRevenue"]);
+            </text>
+        }
+
+            const csvContent = "data:text/csv;charset=utf-8," + rows.map(e => e.join(",")).join("\n");
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "top_products.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+
+        document.getElementById('downloadPdfBtn').addEventListener('click', async function () {
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF();
+            const content = document.querySelector("table");
+
+            await html2canvas(content).then(canvas => {
+                const imgData = canvas.toDataURL('image/png');
+                const imgProps = pdf.getImageProperties(imgData);
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+                pdf.addImage(imgData, 'PNG', 0, 10, pdfWidth, pdfHeight);
+                pdf.save("top_products.pdf");
+            });
+        });
+    </script>
+}

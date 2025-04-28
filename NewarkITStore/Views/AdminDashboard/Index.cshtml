@@ -1,0 +1,68 @@
+﻿@model NewarkITStore.ViewModels.AdminDashboardViewModel
+
+@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<h2 class="mb-4">Admin Dashboard</h2>
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card text-white bg-primary mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Total Revenue</h5>
+                <p class="card-text display-6">@Model.TotalRevenue.ToString("C")</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-success mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Total Orders</h5>
+                <p class="card-text display-6">@Model.TotalOrders</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-info mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Total Customers</h5>
+                <p class="card-text display-6">@Model.TotalUsers</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<hr />
+
+<h4 class="mt-4">Top Selling Products</h4>
+<table class="table table-striped mt-3">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Product</th>
+            <th>Quantity Sold</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.TopSellingProducts.Any())
+        {
+            int rank = 1;
+            foreach (var product in Model.TopSellingProducts)
+            {
+                <tr>
+                    <td>@rank</td>
+                    <td>@product.ProductName</td>
+                    <td>@product.QuantitySold</td>
+                </tr>
+                rank++;
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="3" class="text-center">No sales data available.</td>
+            </tr>
+        }
+    </tbody>
+</table>

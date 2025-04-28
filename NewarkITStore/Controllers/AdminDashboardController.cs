@@ -90,12 +90,26 @@ namespace NewarkITStore.Controllers
             return File(bytes, "text/csv", $"OrderStats_{startDate:yyyyMMdd}_{endDate:yyyyMMdd}.csv");
         }
 
-        public async Task<IActionResult> TotalPerCard()
+        public async Task<IActionResult> TotalPerCard(string? email, string? cardLast4, decimal? minAmount, decimal? maxAmount, DateTime? startDate, DateTime? endDate)
         {
-            var data = await _context.Orders
-                .Include(o => o.CreditCard)
-                .Include(o => o.User)
-                .Where(o => o.CreditCardId != null)
+            var query = _context.Orders
+            .Include(o => o.CreditCard)
+            .Include(o => o.User)
+             .Where(o => o.CreditCardId != null);
+
+            if (!string.IsNullOrEmpty(email))
+                query = query.Where(o => o.User.Email.Contains(email));
+
+            if (!string.IsNullOrEmpty(cardLast4))
+                query = query.Where(o => o.CreditCard.CardNumber.EndsWith(cardLast4));
+
+            if (startDate.HasValue)
+                query = query.Where(o => o.OrderDate >= startDate.Value);
+
+            if (endDate.HasValue)
+                query = query.Where(o => o.OrderDate == endDate.Value);
+
+            var grouped = await query
                 .GroupBy(o => new { o.CreditCardId, o.CreditCard.CardNumber, o.User.Email })
                 .Select(g => new CreditCardStatsViewModel
                 {
@@ -103,10 +117,12 @@ namespace NewarkITStore.Controllers
                     MaskedCardNumber = "**** **** **** " + g.Key.CardNumber.Substring(g.Key.CardNumber.Length - 4),
                     TotalCharged = g.Sum(o => o.TotalAmount)
                 })
+                .Where(x => (!minAmount.HasValue || x.TotalCharged >= minAmount.Value)
+                         && (!maxAmount.HasValue || x.TotalCharged <= maxAmount.Value))
                 .OrderByDescending(x => x.TotalCharged)
                 .ToListAsync();
 
-            return View("TotalPerCard", data);
+            return View("TotalPerCard", grouped);
         }
 
 

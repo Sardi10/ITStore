@@ -20,6 +20,29 @@
     Download PDF
 </button>
 
+<form method="get" class="row row-cols-lg-auto g-3 align-items-center mb-4">
+    <div class="col-12">
+        <input type="text" name="email" value="@Context.Request.Query["email"]" class="form-control" placeholder="Email" />
+    </div>
+    <div class="col-12">
+        <input type="text" name="cardLast4" value="@Context.Request.Query["cardLast4"]" class="form-control" maxlength="4" placeholder="Card Last 4" />
+    </div>
+    <div class="col-12">
+        <input type="number" name="minAmount" value="@Context.Request.Query["minAmount"]" step="0.01" class="form-control" placeholder="Min $" />
+    </div>
+    <div class="col-12">
+        <input type="number" name="maxAmount" value="@Context.Request.Query["maxAmount"]" step="0.01" class="form-control" placeholder="Max $" />
+    </div>
+    <div class="col-12">
+        <input type="date" name="startDate" value="@Context.Request.Query["startDate"]" class="form-control" />
+    </div>
+    <div class="col-12">
+        <input type="date" name="endDate" value="@Context.Request.Query["endDate"]" class="form-control" />
+    </div>
+    <div class="col-12">
+        <button type="submit" class="btn btn-primary">Filter</button>
+    </div>
+</form>
 
 
 <table class="table table-bordered mt-3">

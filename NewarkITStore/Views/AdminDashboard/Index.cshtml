@@ -6,6 +6,25 @@
 
 <h2 class="mb-4">Admin Dashboard</h2>
 
+<form method="get" class="row g-2 mb-4">
+    <div class="col-md-3">
+        <label>Start Date</label>
+        <input type="date" name="startDate" value="@ViewBag.StartDate" class="form-control" />
+    </div>
+    <div class="col-md-3">
+        <label>End Date</label>
+        <input type="date" name="endDate" value="@ViewBag.EndDate" class="form-control" />
+    </div>
+    <div class="col-md-2 align-self-end">
+        <button class="btn btn-primary w-100">Filter</button>
+    </div>
+</form>
+
+<p><strong>@ViewBag.RangeMessage</strong></p>
+
+
+
+
 <div class="row mb-4">
     <div class="col-md-4">
         <div class="card text-white bg-primary mb-3">
@@ -32,6 +51,22 @@
         </div>
     </div>
 </div>
+<form method="get" class="row g-2 mb-4">
+    <div class="col-md-3">
+        <label>Start Date</label>
+        <input type="date" name="startDate" value="@ViewBag.StartDate" class="form-control" />
+    </div>
+    <div class="col-md-3">
+        <label>End Date</label>
+        <input type="date" name="endDate" value="@ViewBag.EndDate" class="form-control" />
+    </div>
+    <div class="col-md-2 align-self-end">
+        <button class="btn btn-primary w-100">Filter</button>
+    </div>
+</form>
+
+<p><strong>@ViewBag.RangeMessage</strong></p>
+
 
 <hr />
 

@@ -16,14 +16,30 @@ namespace NewarkITStore.Controllers
             _context = context;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(DateTime? startDate, DateTime? endDate)
         {
-            var totalRevenue = await _context.Orders.SumAsync(o => o.TotalAmount);
-            var totalOrders = await _context.Orders.CountAsync();
+            var today = DateTime.Today;
+            startDate ??= today.AddDays(-30); // default: 30 days ago
+            endDate ??= today;
+
+            ViewBag.StartDate = startDate.Value.ToString("yyyy-MM-dd");
+            ViewBag.EndDate = endDate.Value.ToString("yyyy-MM-dd");
+            ViewBag.RangeMessage = (startDate == today.AddDays(-30) && endDate == today)
+                ? "Showing stats for the last 30 days"
+                : $"Showing stats from {startDate:MMM dd yyyy} to {endDate:MMM dd yyyy}";
+
+            var ordersInRange = await _context.Orders
+                .Where(o => o.OrderDate >= startDate && o.OrderDate <= endDate)
+                .ToListAsync();
+
+            var totalRevenue = ordersInRange.Sum(o => o.TotalAmount);
+            var totalOrders = ordersInRange.Count;
+
             var totalUsers = await _context.Users.CountAsync();
 
             var topProducts = await _context.OrderItems
                 .Include(oi => oi.Product)
+                .Where(oi => oi.Order.OrderDate >= startDate && oi.Order.OrderDate <= endDate)
                 .GroupBy(oi => oi.Product.Name)
                 .Select(g => new AdminDashboardViewModel.TopProduct
                 {
@@ -44,5 +60,6 @@ namespace NewarkITStore.Controllers
 
             return View(model);
         }
+
     }
 }

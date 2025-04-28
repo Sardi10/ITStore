@@ -3,27 +3,8 @@
 @{
     ViewData["Title"] = "Admin Dashboard";
 }
-
+<div id="pdfContent" class="border p-4 bg-white">
 <h2 class="mb-4">Admin Dashboard</h2>
-
-<form method="get" class="row g-2 mb-4">
-    <div class="col-md-3">
-        <label>Start Date</label>
-        <input type="date" name="startDate" value="@ViewBag.StartDate" class="form-control" />
-    </div>
-    <div class="col-md-3">
-        <label>End Date</label>
-        <input type="date" name="endDate" value="@ViewBag.EndDate" class="form-control" />
-    </div>
-    <div class="col-md-2 align-self-end">
-        <button class="btn btn-primary w-100">Filter</button>
-    </div>
-</form>
-
-<p><strong>@ViewBag.RangeMessage</strong></p>
-
-
-
 
 <div class="row mb-4">
     <div class="col-md-4">
@@ -49,6 +30,14 @@
                 <p class="card-text display-6">@Model.TotalUsers</p>
             </div>
         </div>
+    </div>
+    <div class="mb-4">
+        <a asp-action="ExportCsv" asp-route-startDate="@ViewBag.StartDate" asp-route-endDate="@ViewBag.EndDate" class="btn btn-outline-secondary me-2">
+            <i class="bi bi-file-earmark-spreadsheet"></i> Export to CSV
+        </a>
+        <button id="downloadPdfBtn" class="btn btn-outline-danger">
+            <i class="bi bi-file-earmark-pdf"></i> Download PDF
+        </button>
     </div>
 </div>
 <form method="get" class="row g-2 mb-4">
@@ -101,3 +90,27 @@
         }
     </tbody>
 </table>
+</div>
+
+@section Scripts {
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <script>
+        document.getElementById("downloadPdfBtn").addEventListener("click", function () {
+            const element = document.getElementById("pdfContent");
+
+            html2pdf()
+                .from(element)
+                .set({
+                    margin: 0.5,
+                    filename: 'dashboard_report.pdf',
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2 },
+                    jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+                })
+                .save();
+        });
+    </script>
+
+}

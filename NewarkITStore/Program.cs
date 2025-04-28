@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using NewarkITStore.Data;
 using NewarkITStore.Models;
+//using Rotativa.AspNetCore;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -60,6 +62,11 @@ app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+//var env = app.Environment;
+
+//RotativaConfiguration.Setup(env.WebRootPath, "Rotativa");
+
 
 // Routes
 app.MapControllerRoute(

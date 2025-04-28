@@ -31,6 +31,12 @@
             </div>
         </div>
     </div>
+        <h4 class="mt-4 mb-3">Top Selling Products (Chart)</h4>
+        <canvas id="topSellingChart" width="400" height="200"></canvas>
+
+        <button id="downloadChart" class="btn btn-outline-secondary mt-2">
+            Download Chart as PNG
+        </button>
     <div class="mb-4">
         <a asp-action="ExportCsv" asp-route-startDate="@ViewBag.StartDate" asp-route-endDate="@ViewBag.EndDate" class="btn btn-outline-secondary me-2">
             <i class="bi bi-file-earmark-spreadsheet"></i> Export to CSV
@@ -95,6 +101,44 @@
 @section Scripts {
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        // Sample data (replace with dynamic @Model data)
+        let productNames = @Html.Raw(Json.Serialize(Model.TopSellingProducts.Select(p => p.ProductName)));
+        let productQuantities = @Html.Raw(Json.Serialize(Model.TopSellingProducts.Select(p => p.QuantitySold)));
+
+        const ctx = document.getElementById('topSellingChart').getContext('2d');
+        const chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: productNames,
+                datasets: [{
+                    label: 'Units Sold',
+                    data: productQuantities,
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)'
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Top Selling Products'
+                    }
+                }
+            }
+        });
+
+        // Download as image
+        document.getElementById('downloadChart').addEventListener('click', function () {
+            const link = document.createElement('a');
+            link.href = chart.toBase64Image();
+            link.download = 'top-selling-products.png';
+            link.click();
+        });
+    </script>
+
 
     <script>
         document.getElementById("downloadPdfBtn").addEventListener("click", function () {

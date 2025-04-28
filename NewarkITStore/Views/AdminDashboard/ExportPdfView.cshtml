@@ -1,0 +1,34 @@
+﻿@model List<NewarkITStore.Models.Order>
+@using System.Globalization
+
+<h3>Order Summary Report</h3>
+<p><strong>Report Date:</strong> @DateTime.Now.ToString("yyyy-MM-dd")</p>
+
+<table class="table table-sm table-bordered">
+    <thead>
+        <tr>
+            <th>Order #</th>
+            <th>Date</th>
+            <th>Product</th>
+            <th>Qty</th>
+            <th>Price</th>
+            <th>Total</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var order in Model)
+        {
+            foreach (var item in order.OrderItems)
+            {
+                <tr>
+                    <td>@order.OrderId</td>
+                    <td>@order.OrderDate.ToShortDateString()</td>
+                    <td>@item.Product.Name</td>
+                    <td>@item.Quantity</td>
+                    <td>@item.PricePerUnit.ToString("C")</td>
+                    <td>@(item.Quantity * item.PricePerUnit).ToString("C")</td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>

@@ -198,7 +198,9 @@ namespace NewarkITStore.Controllers
                 ? data.OrderByDescending(x => x.UnitsSold).Take(topN).ToList()
                 : data.OrderByDescending(x => x.TotalRevenue).Take(topN).ToList();
 
+            ViewBag.SortBy = sortBy; 
             return View(data);
+
 
         }
 

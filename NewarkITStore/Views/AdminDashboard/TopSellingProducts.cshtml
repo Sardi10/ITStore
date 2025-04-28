@@ -4,6 +4,12 @@
     ViewData["Title"] = "Top Selling Products";
     var topN = Context.Request.Query["topN"].FirstOrDefault() ?? "10";
 }
+@{
+    var selectedSortBy = Context.Request.Query["sortBy"].FirstOrDefault() ?? "revenue";
+    var chartTitle = selectedSortBy == "units" ? "Top Selling Products by Units Sold" : "Top Selling Products by Revenue";
+    var yAxisLabel = selectedSortBy == "units" ? "Units Sold" : "Total Revenue";
+}
+
 
 <h2>@ViewData["Title"]</h2>
 
@@ -66,73 +72,76 @@
     </tbody>
 </table>
 
-@section Scripts {
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 
-    <script>
-        const ctx = document.getElementById('topProductsChart').getContext('2d');
-        const chart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: @Html.Raw(Json.Serialize(Model.Select(p => p.ProductName))),
-                datasets: [{
-                    label: 'Total Revenue',
-                    data: @Html.Raw(Json.Serialize(Model.Select(p => p.TotalRevenue))),
-                    backgroundColor: 'rgba(153, 102, 255, 0.6)'
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    title: {
-                        display: true,
-                        text: 'Top Selling Products'
-                    }
+<script>
+    const ctx = document.getElementById('topProductsChart').getContext('2d');
+    const chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: @Html.Raw(Json.Serialize(Model.Select(p => p.ProductName))),
+            datasets: [{
+                label: '@yAxisLabel', // ✨ Dynamic Y axis label
+                data: @Html.Raw(Json.Serialize(
+           selectedSortBy == "units"
+               ? Model.Select(p => p.UnitsSold)
+               : Model.Select(p => p.TotalRevenue)
+                )),
+                backgroundColor: 'rgba(153, 102, 255, 0.6)'
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                title: {
+                    display: true,
+                    text: '@chartTitle' // ✨ Dynamic Chart Title
                 }
             }
-        });
-
-        document.getElementById('downloadChartBtn').addEventListener('click', function () {
-            const a = document.createElement('a');
-            a.href = chart.toBase64Image();
-            a.download = 'top_products_chart.png';
-            a.click();
-        });
-
-        document.getElementById('downloadCsvBtn').addEventListener('click', function () {
-            const rows = [['Product Name', 'Units Sold', 'Total Revenue']];
-        @foreach (var item in Model)
-        {
-            <text>
-                        rows.push(["@item.ProductName", "@item.UnitsSold", "@item.TotalRevenue"]);
-            </text>
         }
+    });
 
-            const csvContent = "data:text/csv;charset=utf-8," + rows.map(e => e.join(",")).join("\n");
-            const encodedUri = encodeURI(csvContent);
-            const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            link.setAttribute("download", "top_products.csv");
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+    document.getElementById('downloadChartBtn').addEventListener('click', function () {
+        const a = document.createElement('a');
+        a.href = chart.toBase64Image();
+        a.download = 'top_products_chart.png';
+        a.click();
+    });
+
+    document.getElementById('downloadCsvBtn').addEventListener('click', function () {
+        const rows = [['Product Name', '@(selectedSortBy == "units" ? "Units Sold" : "Total Revenue")']];
+    @foreach (var item in Model)
+    {
+        <text>
+                    rows.push(["@item.ProductName", "@(selectedSortBy == "units" ? item.UnitsSold : item.TotalRevenue)"]);
+        </text>
+    }
+
+        const csvContent = "data:text/csv;charset=utf-8," + rows.map(e => e.join(",")).join("\n");
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "top_products.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    });
+
+    document.getElementById('downloadPdfBtn').addEventListener('click', async function () {
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF();
+        const content = document.querySelector("table");
+
+        await html2canvas(content).then(canvas => {
+            const imgData = canvas.toDataURL('image/png');
+            const imgProps = pdf.getImageProperties(imgData);
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+            pdf.addImage(imgData, 'PNG', 0, 10, pdfWidth, pdfHeight);
+            pdf.save("top_products.pdf");
         });
+    });
+</script>
 
-        document.getElementById('downloadPdfBtn').addEventListener('click', async function () {
-            const { jsPDF } = window.jspdf;
-            const pdf = new jsPDF();
-            const content = document.querySelector("table");
-
-            await html2canvas(content).then(canvas => {
-                const imgData = canvas.toDataURL('image/png');
-                const imgProps = pdf.getImageProperties(imgData);
-                const pdfWidth = pdf.internal.pageSize.getWidth();
-                const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-                pdf.addImage(imgData, 'PNG', 0, 10, pdfWidth, pdfHeight);
-                pdf.save("top_products.pdf");
-            });
-        });
-    </script>
-}

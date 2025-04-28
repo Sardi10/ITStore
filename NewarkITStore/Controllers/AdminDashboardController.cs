@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Globalization;
+using System.Text;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -107,8 +108,10 @@ namespace NewarkITStore.Controllers
                 query = query.Where(o => o.OrderDate >= startDate.Value);
 
             if (endDate.HasValue)
-                query = query.Where(o => o.OrderDate == endDate.Value);
-
+            {
+                var endOfDay = endDate.Value.Date.AddDays(1).AddTicks(-1); // Sets time to 23:59:59.9999999
+                query = query.Where(o => o.OrderDate <= endOfDay);
+            }
             var grouped = await query
                 .GroupBy(o => new { o.CreditCardId, o.CreditCard.CardNumber, o.User.Email })
                 .Select(g => new CreditCardStatsViewModel
@@ -125,6 +128,108 @@ namespace NewarkITStore.Controllers
             return View("TotalPerCard", grouped);
         }
 
+        public async Task<IActionResult> TopCustomers(DateTime? startDate,DateTime? endDate,string productName,string productCategory,int topN = 10)
+        {
+            var query = _context.Orders
+                .Include(o => o.User)
+                .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.Product)
+                .AsQueryable();
+
+            if (startDate.HasValue)
+                query = query.Where(o => o.OrderDate >= startDate.Value);
+
+            if (endDate.HasValue)
+                query = query.Where(o => o.OrderDate <= endDate.Value.Date.AddDays(1).AddSeconds(-1));
+
+            if (!string.IsNullOrEmpty(productName))
+                query = query.Where(o => o.OrderItems.Any(oi => oi.Product.Name.Contains(productName)));
+
+            if (!string.IsNullOrEmpty(productCategory))
+                query = query.Where(o => o.OrderItems.Any(oi => oi.Product.ProductType.Name.Contains(productCategory)));
+
+            var result = await query
+                .SelectMany(o => o.OrderItems.Select(oi => new
+                {
+                    o.User.Email,
+                    Amount = oi.PricePerUnit * oi.Quantity * 1.1m // assuming 10% tax
+                }))
+                .GroupBy(x => x.Email)
+                .Select(g => new TopCustomerViewModel
+                {
+                    UserEmail = g.Key,
+                    TotalSpent = g.Sum(x => x.Amount)
+                })
+                .OrderByDescending(x => x.TotalSpent)
+                .Take(topN)
+                .ToListAsync();
+
+            return View(result);
+        }
+
+        public async Task<IActionResult> TopSellingProducts(DateTime? startDate, DateTime? endDate, string category, int topN = 10, string sortBy = "revenue")
+        {
+            var query = _context.OrderItems
+            .Include(oi => oi.Product)
+            .Include(oi => oi.Order)
+            .AsQueryable();
+
+            if (startDate.HasValue)
+                query = query.Where(oi => oi.Order.OrderDate >= startDate.Value);
+
+            if (endDate.HasValue)
+                query = query.Where(oi => oi.Order.OrderDate <= endDate.Value.Date.AddDays(1).AddSeconds(-1));
+
+            if (!string.IsNullOrEmpty(category))
+                query = query.Where(oi => oi.Product.ProductType.Name.ToLower().Contains(category.ToLower()));
+
+            var data = await query
+                .GroupBy(oi => oi.Product.Name)
+                .Select(g => new TopProductStatsViewModel
+                {
+                    ProductName = g.Key,
+                    UnitsSold = g.Sum(oi => oi.Quantity),
+                    TotalRevenue = g.Sum(oi => oi.Quantity * oi.PricePerUnit * 1.1m)
+                })
+                .ToListAsync();
+
+            // Sort based on selection
+            data = sortBy.ToLower() == "units"
+                ? data.OrderByDescending(x => x.UnitsSold).Take(topN).ToList()
+                : data.OrderByDescending(x => x.TotalRevenue).Take(topN).ToList();
+
+            ViewBag.SortBy = sortBy; 
+            return View(data);
+
+        }
+
+        public async Task<IActionResult> TopProductsByCustomers(DateTime? startDate, DateTime? endDate, int topN = 10)
+        {
+            var query = _context.OrderItems
+                .Include(oi => oi.Product)
+                .Include(oi => oi.Order)
+                    .ThenInclude(o => o.User)
+                .AsQueryable();
+
+            if (startDate.HasValue)
+                query = query.Where(oi => oi.Order.OrderDate >= startDate.Value);
+
+            if (endDate.HasValue)
+                query = query.Where(oi => oi.Order.OrderDate <= endDate.Value.Date.AddDays(1).AddSeconds(-1));
+
+            var result = await query
+                .GroupBy(oi => oi.Product.Name)
+                .Select(g => new TopProductByCustomersViewModel
+                {
+                    ProductName = g.Key,
+                    UniqueCustomerCount = g.Select(oi => oi.Order.User.Id).Distinct().Count()
+                })
+                .OrderByDescending(x => x.UniqueCustomerCount)
+                .Take(topN)
+                .ToListAsync();
+
+            return View(result);
+        }
 
 
     }

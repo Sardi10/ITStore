@@ -20,29 +20,38 @@
     Download PDF
 </button>
 
-<form method="get" class="row row-cols-lg-auto g-3 align-items-center mb-4">
-    <div class="col-12">
-        <input type="text" name="email" value="@Context.Request.Query["email"]" class="form-control" placeholder="Email" />
+<form method="get" class="mb-4">
+    <div class="row row-cols-lg-auto g-3 align-items-center mb-2">
+        <div class="col">
+            <input type="text" name="email" value="@Context.Request.Query["email"]" class="form-control" placeholder="Email" />
+        </div>
+        <div class="col">
+            <input type="text" name="cardLast4" value="@Context.Request.Query["cardLast4"]" class="form-control" maxlength="4" placeholder="Card Last 4" />
+        </div>
+        <div class="col">
+            <input type="number" name="minAmount" value="@Context.Request.Query["minAmount"]" class="form-control" step="0.01" placeholder="Min $" />
+        </div>
+        <div class="col">
+            <input type="number" name="maxAmount" value="@Context.Request.Query["maxAmount"]" class="form-control" step="0.01" placeholder="Max $" />
+        </div>
     </div>
-    <div class="col-12">
-        <input type="text" name="cardLast4" value="@Context.Request.Query["cardLast4"]" class="form-control" maxlength="4" placeholder="Card Last 4" />
-    </div>
-    <div class="col-12">
-        <input type="number" name="minAmount" value="@Context.Request.Query["minAmount"]" step="0.01" class="form-control" placeholder="Min $" />
-    </div>
-    <div class="col-12">
-        <input type="number" name="maxAmount" value="@Context.Request.Query["maxAmount"]" step="0.01" class="form-control" placeholder="Max $" />
-    </div>
-    <div class="col-12">
-        <input type="date" name="startDate" value="@Context.Request.Query["startDate"]" class="form-control" />
-    </div>
-    <div class="col-12">
-        <input type="date" name="endDate" value="@Context.Request.Query["endDate"]" class="form-control" />
-    </div>
-    <div class="col-12">
-        <button type="submit" class="btn btn-primary">Filter</button>
+
+    <div class="row row-cols-lg-auto g-3 align-items-center">
+        <div class="col d-flex align-items-center">
+            <label for="startDate" class="me-2 mb-0">From</label>
+            <input type="date" id="startDate" name="startDate" value="@Context.Request.Query["startDate"]" class="form-control" />
+        </div>
+        <div class="col d-flex align-items-center">
+            <label for="endDate" class="me-2 mb-0">To</label>
+            <input type="date" id="endDate" name="endDate" value="@Context.Request.Query["endDate"]" class="form-control" />
+        </div>
+        <div class="col">
+            <button type="submit" class="btn btn-primary">Filter</button>
+        </div>
     </div>
 </form>
+
+
 
 
 <table class="table table-bordered mt-3">

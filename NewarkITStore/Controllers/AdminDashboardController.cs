@@ -201,7 +201,34 @@ namespace NewarkITStore.Controllers
             ViewBag.SortBy = sortBy; 
             return View(data);
 
+        }
 
+        public async Task<IActionResult> TopProductsByCustomers(DateTime? startDate, DateTime? endDate, int topN = 10)
+        {
+            var query = _context.OrderItems
+                .Include(oi => oi.Product)
+                .Include(oi => oi.Order)
+                    .ThenInclude(o => o.User)
+                .AsQueryable();
+
+            if (startDate.HasValue)
+                query = query.Where(oi => oi.Order.OrderDate >= startDate.Value);
+
+            if (endDate.HasValue)
+                query = query.Where(oi => oi.Order.OrderDate <= endDate.Value.Date.AddDays(1).AddSeconds(-1));
+
+            var result = await query
+                .GroupBy(oi => oi.Product.Name)
+                .Select(g => new TopProductByCustomersViewModel
+                {
+                    ProductName = g.Key,
+                    UniqueCustomerCount = g.Select(oi => oi.Order.User.Id).Distinct().Count()
+                })
+                .OrderByDescending(x => x.UniqueCustomerCount)
+                .Take(topN)
+                .ToListAsync();
+
+            return View(result);
         }
 
 

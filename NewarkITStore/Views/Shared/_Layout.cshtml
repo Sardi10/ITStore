@@ -8,19 +8,6 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/NewarkITStore.styles.css" asp-append-version="true" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-    <style>
-        /* Open dropdown on hover */
-        .hover-dropdown:hover .dropdown-menu {
-            display: block;
-            margin-top: 0;
-        }
-
-        /* Optional: smoothly fade in dropdown */
-        .dropdown-menu {
-            transition: all 0.2s ease-in-out;
-        }
-    </style>
-
 </head>
 <body>
     <header>
@@ -42,8 +29,18 @@
                                 <ul class="dropdown-menu" aria-labelledby="adminDropdown">
                                     <li><a class="dropdown-item" asp-controller="Admin" asp-action="Users">Manage Users</a></li>
                                     <li><a class="dropdown-item" asp-controller="AdminOrders" asp-action="Index">Manage Orders</a></li>
-                                    <a class="dropdown-item" asp-controller="ProductType" asp-action="Index">Manage Product Types</a>
-                                    <li><a class="dropdown-item" asp-controller="AdminDashboard" asp-action="Index">View Statistics</a></li>
+                                    <li> <a class="dropdown-item" asp-controller="ProductType" asp-action="Index">Manage Product Types</a></li>
+                                    <li class="dropdown-submenu position-relative">
+                                        <a class="dropdown-item dropdown-toggle" href="#">View Statistics</a>
+                                        <ul class="dropdown-menu">
+                                            <li>
+                                                <a class="dropdown-item " asp-controller="AdminDashboard" asp-action="Index">Total Sales</a> </li>
+                                               <li> <a class="dropdown-item" asp-controller="AdminDashboard" asp-action="TotalPerCard">
+                                                    Total Charged per Credit Card
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </li>                           
                                 </ul>
                             </li>
                             <li class="nav-item">
@@ -83,6 +80,28 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script>
+        document.querySelectorAll('.dropdown-submenu > a').forEach(function (element) {
+            element.addEventListener('click', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                let submenu = this.nextElementSibling;
+                if (submenu) {
+                    submenu.classList.toggle('show');
+                }
+            });
+        });
+
+        // Close submenus when dropdown closes
+        document.querySelectorAll('.dropdown').forEach(function (dropdown) {
+            dropdown.addEventListener('hide.bs.dropdown', function () {
+                this.querySelectorAll('.dropdown-menu.show').forEach(function (submenu) {
+                    submenu.classList.remove('show');
+                });
+            });
+        });
+    </script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

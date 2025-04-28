@@ -107,8 +107,10 @@ namespace NewarkITStore.Controllers
                 query = query.Where(o => o.OrderDate >= startDate.Value);
 
             if (endDate.HasValue)
-                query = query.Where(o => o.OrderDate == endDate.Value);
-
+            {
+                var endOfDay = endDate.Value.Date.AddDays(1).AddTicks(-1); // Sets time to 23:59:59.9999999
+                query = query.Where(o => o.OrderDate <= endOfDay);
+            }
             var grouped = await query
                 .GroupBy(o => new { o.CreditCardId, o.CreditCard.CardNumber, o.User.Email })
                 .Select(g => new CreditCardStatsViewModel
@@ -123,6 +125,45 @@ namespace NewarkITStore.Controllers
                 .ToListAsync();
 
             return View("TotalPerCard", grouped);
+        }
+
+        public async Task<IActionResult> TopCustomers(DateTime? startDate,DateTime? endDate,string productName,string productCategory,int topN = 10)
+        {
+            var query = _context.Orders
+                .Include(o => o.User)
+                .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.Product)
+                .AsQueryable();
+
+            if (startDate.HasValue)
+                query = query.Where(o => o.OrderDate >= startDate.Value);
+
+            if (endDate.HasValue)
+                query = query.Where(o => o.OrderDate <= endDate.Value.Date.AddDays(1).AddSeconds(-1));
+
+            if (!string.IsNullOrEmpty(productName))
+                query = query.Where(o => o.OrderItems.Any(oi => oi.Product.Name.Contains(productName)));
+
+            if (!string.IsNullOrEmpty(productCategory))
+                query = query.Where(o => o.OrderItems.Any(oi => oi.Product.ProductType.Name.Contains(productCategory)));
+
+            var result = await query
+                .SelectMany(o => o.OrderItems.Select(oi => new
+                {
+                    o.User.Email,
+                    Amount = oi.PricePerUnit * oi.Quantity * 1.1m // assuming 10% tax
+                }))
+                .GroupBy(x => x.Email)
+                .Select(g => new TopCustomerViewModel
+                {
+                    UserEmail = g.Key,
+                    TotalSpent = g.Sum(x => x.Amount)
+                })
+                .OrderByDescending(x => x.TotalSpent)
+                .Take(topN)
+                .ToListAsync();
+
+            return View(result);
         }
 
 

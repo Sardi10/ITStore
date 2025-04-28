@@ -90,7 +90,25 @@ namespace NewarkITStore.Controllers
             return File(bytes, "text/csv", $"OrderStats_{startDate:yyyyMMdd}_{endDate:yyyyMMdd}.csv");
         }
 
-        
+        public async Task<IActionResult> TotalPerCard()
+        {
+            var data = await _context.Orders
+                .Include(o => o.CreditCard)
+                .Include(o => o.User)
+                .Where(o => o.CreditCardId != null)
+                .GroupBy(o => new { o.CreditCardId, o.CreditCard.CardNumber, o.User.Email })
+                .Select(g => new CreditCardStatsViewModel
+                {
+                    UserEmail = g.Key.Email,
+                    MaskedCardNumber = "**** **** **** " + g.Key.CardNumber.Substring(g.Key.CardNumber.Length - 4),
+                    TotalCharged = g.Sum(o => o.TotalAmount)
+                })
+                .OrderByDescending(x => x.TotalCharged)
+                .ToListAsync();
+
+            return View("TotalPerCard", data);
+        }
+
 
 
     }

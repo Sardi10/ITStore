@@ -1,0 +1,27 @@
+﻿@model IEnumerable<NewarkITStore.ViewModels.CreditCardStatsViewModel>
+
+@{
+    ViewData["Title"] = "Total Amount Charged per Credit Card";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<table class="table table-bordered mt-3">
+    <thead class="table-light">
+        <tr>
+            <th>User Email</th>
+            <th>Masked Card Number</th>
+            <th>Total Charged</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var stat in Model)
+        {
+            <tr>
+                <td>@stat.UserEmail</td>
+                <td>@stat.MaskedCardNumber</td>
+                <td>@stat.TotalCharged.ToString("C")</td>
+            </tr>
+        }
+    </tbody>
+</table>

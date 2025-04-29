@@ -1,41 +1,31 @@
-﻿@model IEnumerable<NewarkITStore.ViewModels.TopCustomerViewModel>
+﻿@model IEnumerable<NewarkITStore.ViewModels.MaxBasketPerCardViewModel>
 
 @{
-    ViewData["Title"] = "Top Customers by Spending";
+    ViewData["Title"] = "Max Basket Total per Card";
     var topN = Context.Request.Query["topN"].FirstOrDefault() ?? "10";
 }
 
 <h2>@ViewData["Title"]</h2>
 
 <form method="get" class="row mb-4 mt-3">
-    <div class="col-md-2">
+    <div class="col-md-3">
         <label>From</label>
         <input type="date" name="startDate" class="form-control" value="@Context.Request.Query["startDate"]" />
     </div>
-    <div class="col-md-2">
+    <div class="col-md-3">
         <label>To</label>
         <input type="date" name="endDate" class="form-control" value="@Context.Request.Query["endDate"]" />
     </div>
     <div class="col-md-3">
-        <label>Product Name</label>
-        <input type="text" name="productName" class="form-control" value="@Context.Request.Query["productName"]" />
-    </div>
-    <div class="col-md-3">
-        <label>Product Category</label>
-        <input type="text" name="productCategory" class="form-control" value="@Context.Request.Query["productCategory"]" />
-    </div>
-    <div class="col-md-2">
         <label>Top N</label>
         <input type="number" name="topN" class="form-control" value="@topN" />
     </div>
-
-    <div class="col-md-12 mt-3">
-        <button type="submit" class="btn btn-primary">Filter</button>
+    <div class="col-md-3 mt-4">
+        <button type="submit" class="btn btn-primary mt-2">Filter</button>
     </div>
 </form>
 
-<!-- Chart -->
-<canvas id="topCustomersChart" width="600" height="200"></canvas>
+<canvas id="maxBasketChart" height="120"></canvas>
 
 <div class="mt-3">
     <button id="downloadChartBtn" class="btn btn-outline-primary me-2">Download Chart as Image</button>
@@ -43,50 +33,63 @@
     <button id="downloadPdfBtn" class="btn btn-outline-danger">Download PDF</button>
 </div>
 
-
-<!-- Table -->
 <table class="table table-bordered mt-4">
     <thead class="table-light">
         <tr>
-            <th>Email</th>
-            <th>Total Spent</th>
+            <th>User Email</th>
+            <th>Masked Card</th>
+            <th>Max Basket Total</th>
         </tr>
     </thead>
     <tbody>
-        @foreach (var customer in Model)
+        @foreach (var item in Model)
         {
             <tr>
-                <td>@customer.UserEmail</td>
-                <td>@customer.TotalSpent.ToString("C")</td>
+                <td>@item.UserEmail</td>
+                <td>@item.MaskedCardNumber</td>
+                <td>@item.MaxBasketTotal.ToString("C")</td>
             </tr>
         }
     </tbody>
 </table>
 
 @section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 
-
-
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        const ctx = document.getElementById('topCustomersChart').getContext('2d');
+                const ctx = document.getElementById('maxBasketChart').getContext('2d');
 
-        const fullLabels = @Html.Raw(Json.Serialize(Model.Select(x => x.UserEmail)));
-        const totals = @Html.Raw(Json.Serialize(Model.Select(x => x.TotalSpent)));
+        const fullLabels = @Html.Raw(Json.Serialize(Model.Select(m => m.UserEmail + " (" + m.MaskedCardNumber + ")")));
+        const totals = @Html.Raw(Json.Serialize(Model.Select(m => m.MaxBasketTotal)));
 
-        // Short placeholder labels like #1, #2, #3...
+        // Dynamic color calculation based on basket amount
+        const maxTotal = Math.max(...totals);
+        const minTotal = Math.min(...totals);
+
+        function getColor(total) {
+            const intensity = (total - minTotal) / (maxTotal - minTotal || 1);
+            const red = Math.floor(54 - (intensity * 30));
+            const green = Math.floor(162 - (intensity * 80));
+            const blue = Math.floor(235 - (intensity * 100));
+            return `rgba(${red}, ${green}, ${blue}, 0.7)`;
+        }
+
+        const barColors = totals.map(total => getColor(total));
+
+        // SHORT labels (just numbers or empty)
         const shortLabels = fullLabels.map((_, index) => `#${index + 1}`);
 
         const chart = new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: shortLabels, // 👉 only short labels below bars
+                labels: shortLabels, // 👉 Only short labels under bars
                 datasets: [{
-                    label: 'Total Spent',
+                    label: 'Max Basket Total',
                     data: totals,
-                    backgroundColor: 'rgba(75, 192, 192, 0.6)'
+                    backgroundColor: barColors,
+                    borderWidth: 1
                 }]
             },
             options: {
@@ -94,16 +97,16 @@
                 plugins: {
                     title: {
                         display: true,
-                        text: 'Top Customers by Spending'
+                        text: 'Max Basket Total per Card'
                     },
                     tooltip: {
                         callbacks: {
                             title: function(context) {
                                 const index = context[0].dataIndex;
-                                return fullLabels[index]; // 👉 full email shown on hover
+                                return fullLabels[index]; // 👉 Full label in tooltip
                             },
                             label: function(context) {
-                                return "Total Spent: $" + context.parsed.y.toFixed(2);
+                                return "Max Basket: $" + context.parsed.y.toFixed(2);
                             }
                         }
                     },
@@ -114,62 +117,70 @@
                 scales: {
                     x: {
                         ticks: {
-                            display: false // Hides even short labels like #1 if you want ultra clean
+                            display: false // 👉 Hides the short labels if you want no clutter at all
                         }
                     },
                     y: {
                         beginAtZero: true
                     }
                 }
-            }
+            },
+            plugins: [{
+                id: 'customLabels',
+                afterDatasetsDraw(chart) {
+                    const { ctx } = chart;
+                    chart.data.datasets.forEach((dataset, i) => {
+                        chart.getDatasetMeta(i).data.forEach((bar, index) => {
+                            const value = dataset.data[index];
+                            ctx.fillStyle = '#000';
+                            ctx.font = '12px Arial';
+                            ctx.textAlign = 'center';
+                            ctx.fillText(`$${value.toFixed(0)}`, bar.x, bar.y - 5);
+                        });
+                    });
+                }
+            }]
         });
-    </script>
 
-    <script>
-        // Download chart as image (already added)
+
         document.getElementById('downloadChartBtn').addEventListener('click', function () {
             const a = document.createElement('a');
             a.href = chart.toBase64Image();
-            a.download = 'top_customers_chart.png';
+            a.download = 'max_basket_chart.png';
             a.click();
         });
 
-        // Download CSV
         document.getElementById('downloadCsvBtn').addEventListener('click', function () {
-            const rows = [['User Email', 'Total Spent']];
+            const rows = [['User Email', 'Masked Card', 'Max Basket Total']];
         @foreach (var item in Model)
         {
             <text>
-                        rows.push(["@item.UserEmail", "@item.TotalSpent"]);
+                        rows.push(["@item.UserEmail", "@item.MaskedCardNumber", "@item.MaxBasketTotal"]);
             </text>
         }
 
-            const csvContent = "data:text/csv;charset=utf-8,"
-                + rows.map(e => e.join(",")).join("\n");
-
+            const csvContent = "data:text/csv;charset=utf-8," + rows.map(e => e.join(",")).join("\n");
             const encodedUri = encodeURI(csvContent);
             const link = document.createElement("a");
             link.setAttribute("href", encodedUri);
-            link.setAttribute("download", "top_customers.csv");
+            link.setAttribute("download", "max_basket_per_card.csv");
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
         });
 
-        // Download PDF
         document.getElementById('downloadPdfBtn').addEventListener('click', async function () {
             const { jsPDF } = window.jspdf;
             const pdf = new jsPDF();
+            const content = document.querySelector("table");
 
-            const content = document.querySelector("table"); // you can wrap this in a div if you want more
             await html2canvas(content).then(canvas => {
                 const imgData = canvas.toDataURL('image/png');
                 const imgProps = pdf.getImageProperties(imgData);
                 const pdfWidth = pdf.internal.pageSize.getWidth();
                 const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-
                 pdf.addImage(imgData, 'PNG', 0, 10, pdfWidth, pdfHeight);
-                pdf.save("top_customers.pdf");
+                pdf.save("max_basket_per_card.pdf");
             });
         });
     </script>

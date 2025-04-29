@@ -57,15 +57,38 @@
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 
     <script>
-        const ctx = document.getElementById('productsByCustomersChart').getContext('2d');
+                      const ctx = document.getElementById('productsByCustomersChart').getContext('2d');
+
+        // Prepare data
+        const fullLabels = @Html.Raw(Json.Serialize(Model.Select(p => p.ProductName)));
+        const customerCounts = @Html.Raw(Json.Serialize(Model.Select(p => p.UniqueCustomerCount)));
+
+        // Dynamically generate colors based on customer count
+        const maxCount = Math.max(...customerCounts);
+        const minCount = Math.min(...customerCounts);
+
+        function getColor(count) {
+            const intensity = (count - minCount) / (maxCount - minCount || 1); // avoid division by 0
+            const red = Math.floor(255 - (intensity * 100));    // Less customers = lighter red
+            const green = Math.floor(205 - (intensity * 100));  // Less customers = lighter yellow
+            const blue = Math.floor(86 - (intensity * 50));     // Adjust blue a little bit
+            return `rgba(${red}, ${green}, ${blue}, 0.7)`;
+        }
+
+        const barColors = customerCounts.map(c => getColor(c));
+
+        // Short labels: #1, #2, #3...
+        const shortLabels = fullLabels.map((_, index) => `#${index + 1}`);
+
+        // Create the chart
         const chart = new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: @Html.Raw(Json.Serialize(Model.Select(p => p.ProductName))),
+                labels: shortLabels, // Only short labels under bars
                 datasets: [{
                     label: 'Unique Customers',
-                    data: @Html.Raw(Json.Serialize(Model.Select(p => p.UniqueCustomerCount))),
-                    backgroundColor: 'rgba(255, 205, 86, 0.6)' // light yellow
+                    data: customerCounts,
+                    backgroundColor: barColors
                 }]
             },
             options: {
@@ -74,11 +97,37 @@
                     title: {
                         display: true,
                         text: 'Top Products by Distinct Customers'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            title: function(context) {
+                                const index = context[0].dataIndex;
+                                return fullLabels[index]; // Full product name shown on hover
+                            },
+                            label: function(context) {
+                                return "Unique Customers: " + context.parsed.y;
+                            }
+                        }
+                    },
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: {
+                            display: false // Hide even the short #1, #2 if you want ultra clean
+                        }
+                    },
+                    y: {
+                        beginAtZero: true
                     }
                 }
             }
         });
 
+
+        // Export buttons (same as before)
         document.getElementById('downloadChartBtn').addEventListener('click', function () {
             const a = document.createElement('a');
             a.href = chart.toBase64Image();

@@ -2,13 +2,14 @@
 
 @{
     ViewData["Title"] = "Top Selling Products";
-    var topN = Context.Request.Query["topN"].FirstOrDefault() ?? "10";
-}
-@{
-    var selectedSortBy = Context.Request.Query["sortBy"].FirstOrDefault() ?? "revenue";
+
+    var topN = ViewBag.TopN ?? "10";
+    var selectedSortBy = ViewBag.SortBy ?? "revenue";
+
     var chartTitle = selectedSortBy == "units" ? "Top Selling Products by Units Sold" : "Top Selling Products by Revenue";
     var yAxisLabel = selectedSortBy == "units" ? "Units Sold" : "Total Revenue";
 }
+
 
 
 <h2>@ViewData["Title"]</h2>
@@ -32,6 +33,7 @@
     </div>
     <div class="col-md-2">
         <label>Sort By</label>
+
         <select name="sortBy" class="form-control">
             <option value="revenue" selected="@(Context.Request.Query["sortBy"] == "units" ? "false" : "true")">Revenue</option>
             <option value="units" selected="@(Context.Request.Query["sortBy"] == "units" ? "true" : "false")">Units Sold</option>
@@ -77,28 +79,57 @@
 <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 
 <script>
-    const ctx = document.getElementById('topProductsChart').getContext('2d');
+     const ctx = document.getElementById('topProductsChart').getContext('2d');
+
+    const fullLabels = @Html.Raw(Json.Serialize(Model.Select(p => p.ProductName)));
+    const dataValues = @Html.Raw(Json.Serialize(
+        selectedSortBy == "units"
+            ? Model.Select(p => p.UnitsSold)
+            : Model.Select(p => p.TotalRevenue)
+    ));
+
+    const shortLabels = fullLabels.map((_, index) => `#${index + 1}`);
+
     const chart = new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: @Html.Raw(Json.Serialize(Model.Select(p => p.ProductName))),
-                datasets: [{
-        label: '@yAxisLabel', // Dynamic Y-axis label
-        data: @Html.Raw(Json.Serialize(
-           selectedSortBy == "units"
-               ? Model.Select(p => p.UnitsSold)
-               : Model.Select(p => p.TotalRevenue)
-        )),
-        backgroundColor: '@(selectedSortBy == "units" ? "rgba(153, 102, 255, 0.6)" : "rgba(255, 159, 64, 0.6)")'
-    }]
-
+            labels: shortLabels, // Only short labels under bars
+            datasets: [{
+                label: '@yAxisLabel',
+                data: dataValues,
+                backgroundColor: '@(selectedSortBy == "units" ? "rgba(153, 102, 255, 0.6)" : "rgba(255, 159, 64, 0.6)")'
+            }]
         },
         options: {
             responsive: true,
             plugins: {
                 title: {
                     display: true,
-                    text: '@chartTitle' // Dynamic Chart Title
+                    text: '@chartTitle'
+                },
+                tooltip: {
+                    callbacks: {
+                        title: function(context) {
+                            const index = context[0].dataIndex;
+                            return fullLabels[index]; // Full product name in tooltip
+                        },
+                        label: function(context) {
+                            return "@(selectedSortBy == "units" ? "Units Sold: " : "Total Revenue: $")" + context.parsed.y.toFixed(2);
+                        }
+                    }
+                },
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                x: {
+                    ticks: {
+                        display: false // Hide short labels if you want ultra clean
+                    }
+                },
+                y: {
+                    beginAtZero: true
                 }
             }
         }

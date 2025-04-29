@@ -4,6 +4,11 @@
 <p>Thank you for your purchase!</p>
 <p><strong>Order #: </strong>@Model.OrderId</p>
 <p><strong>Date:</strong> @Model.OrderDate.ToShortDateString()</p>
+@if (Model.OrderItems.Any(item => item.Product.RecommendedPrice > item.PricePerUnit))
+{
+    <p class="text-success"><i class="bi bi-tags-fill"></i> Discounts Applied to your order!</p>
+}
+
 
 <table class="table">
     <thead>

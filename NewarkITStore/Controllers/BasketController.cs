@@ -26,46 +26,36 @@ namespace NewarkITStore.Controllers
         public async Task<IActionResult> Index()
         {
             var userId = _userManager.GetUserId(User);
+            var user = await _userManager.FindByIdAsync(userId);
+
             var items = await _context.BasketItems
-                                      .Include(b => b.Product)
-                                      .Where(b => b.UserId == userId)
-                                      .ToListAsync();
+                .Include(b => b.Product)
+                .Where(b => b.UserId == userId)
+                .ToListAsync();
+
+            var today = DateTime.Today;
+            var activeOffers = await _context.Offers
+                .Where(o => o.StartDate <= today && o.EndDate >= today)
+                .ToListAsync();
+
+            bool isEligibleForOffer = user.Status == "Gold" || user.Status == "Platinum";
+
+            foreach (var item in items)
+            {
+                var matchingOffer = activeOffers.FirstOrDefault(o => o.ProductId == item.ProductId);
+                if (matchingOffer != null && isEligibleForOffer)
+                {
+                    item.PricePerUnit = matchingOffer.OfferPrice;
+                }
+                else
+                {
+                    item.PricePerUnit = item.Product.RecommendedPrice;
+                }
+            }
 
             return View(items);
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Add(int productId)
-        {
-            var userId = _userManager.GetUserId(User);
-            var product = await _context.Products.FindAsync(productId);
-
-            if (product == null)
-                return NotFound();
-
-            var basketItem = await _context.BasketItems
-                .FirstOrDefaultAsync(b => b.ProductId == productId && b.UserId == userId);
-
-            if (basketItem != null)
-            {
-                basketItem.Quantity++;
-            }
-            else
-            {
-                basketItem = new BasketItem
-                {
-                    ProductId = productId,
-                    UserId = userId,
-                    Quantity = 1,
-                    PricePerUnit = product.RecommendedPrice
-                };
-                _context.BasketItems.Add(basketItem);
-            }
-
-            await _context.SaveChangesAsync();
-            return RedirectToAction("Index");
-        }
 
         [HttpPost]
         public async Task<IActionResult> IncreaseQuantity(int id)
@@ -105,6 +95,40 @@ namespace NewarkITStore.Controllers
             return RedirectToAction("Index");
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Add(int productId)
+        {
+            var userId = _userManager.GetUserId(User);
+            var product = await _context.Products.FindAsync(productId);
+
+            if (product == null)
+                return NotFound();
+
+            var basketItem = await _context.BasketItems
+                .FirstOrDefaultAsync(b => b.ProductId == productId && b.UserId == userId);
+
+            if (basketItem != null)
+            {
+                basketItem.Quantity++;
+            }
+            else
+            {
+                basketItem = new BasketItem
+                {
+                    ProductId = productId,
+                    UserId = userId,
+                    Quantity = 1,
+                    PricePerUnit = product.RecommendedPrice
+                };
+                _context.BasketItems.Add(basketItem);
+            }
+
+            await _context.SaveChangesAsync();
+            return RedirectToAction("Index");
+        }
+
+
         public IActionResult CartSummary()
         {
             var userId = _userManager.GetUserId(User);
@@ -121,6 +145,7 @@ namespace NewarkITStore.Controllers
         public async Task<IActionResult> Checkout(string CardholderName, string CardNumber, string Expiration, string CVV, int ShippingAddressId)
         {
             var userId = _userManager.GetUserId(User);
+            var user = await _userManager.FindByIdAsync(userId);
 
             var basketItems = await _context.BasketItems
                 .Include(b => b.Product)
@@ -133,25 +158,48 @@ namespace NewarkITStore.Controllers
                 return RedirectToAction("Index");
             }
 
+            // Load active offers
+            var today = DateTime.Today;
+            var activeOffers = await _context.Offers
+                .Where(o => o.StartDate <= today && o.EndDate >= today)
+                .ToListAsync();
+
+            // Determine if user has Gold or Platinum status
+            bool isEligibleForOffer = user.Status == "Gold" || user.Status == "Platinum";
+
+            // Apply offer prices where applicable
+            foreach (var item in basketItems)
+            {
+                var matchingOffer = activeOffers.FirstOrDefault(o => o.ProductId == item.ProductId);
+
+                if (matchingOffer != null && isEligibleForOffer)
+                {
+                    item.PricePerUnit = matchingOffer.OfferPrice;
+                }
+                else
+                {
+                    item.PricePerUnit = item.Product.RecommendedPrice;
+                }
+            }
+
+            // Handle payment method
             int? selectedCardId = null;
             string savedCardIdRaw = Request.Form["SavedCardId"];
 
             if (!string.IsNullOrEmpty(savedCardIdRaw) && int.TryParse(savedCardIdRaw, out var parsedId) && parsedId > 0)
             {
-                // Use selected saved card
                 selectedCardId = parsedId;
             }
             else
             {
-                // Create a new CreditCard record
                 var newCard = new CreditCard
                 {
                     UserId = userId,
-                    CardNumber = Request.Form["CardNumber"],
-                    SecurityCode = Request.Form["CVV"],
-                    CardHolderName = Request.Form["CardholderName"],
-                    ExpiryDate = DateTime.TryParse(Request.Form["Expiration"], out var expiry) ? expiry : DateTime.UtcNow.AddYears(2),
-                    CardType = Request.Form["CardType"], // Optional: if you're using dropdown for Visa/Amex/etc.
+                    CardNumber = CardNumber,
+                    SecurityCode = CVV,
+                    CardHolderName = CardholderName,
+                    ExpiryDate = DateTime.TryParse(Expiration, out var expiry) ? expiry : DateTime.UtcNow.AddYears(2),
+                    CardType = Request.Form["CardType"],
                     BillingStreet = Request.Form["BillingStreet"],
                     BillingCity = Request.Form["BillingCity"],
                     BillingState = Request.Form["BillingState"],
@@ -160,14 +208,16 @@ namespace NewarkITStore.Controllers
                 };
 
                 _context.CreditCards.Add(newCard);
-                await _context.SaveChangesAsync(); // Needed to generate the ID
+                await _context.SaveChangesAsync();
                 selectedCardId = newCard.CreditCardId;
             }
+
+            // Recalculate subtotal and total
             var subtotal = basketItems.Sum(i => i.PricePerUnit * i.Quantity);
             var tax = subtotal * 0.10m;
             var total = subtotal + tax;
 
-
+            // Create Order
             var order = new Order
             {
                 UserId = userId,
@@ -183,7 +233,6 @@ namespace NewarkITStore.Controllers
                 }).ToList()
             };
 
-
             _context.Orders.Add(order);
             _context.BasketItems.RemoveRange(basketItems);
             await _context.SaveChangesAsync();
@@ -191,6 +240,7 @@ namespace NewarkITStore.Controllers
             TempData["Success"] = "Order placed successfully!";
             return RedirectToAction("OrderConfirmation", new { orderId = order.OrderId });
         }
+
 
 
 
@@ -248,6 +298,7 @@ namespace NewarkITStore.Controllers
         public async Task<IActionResult> CheckoutReview()
         {
             var userId = _userManager.GetUserId(User);
+            var user = await _userManager.FindByIdAsync(userId);
 
             var basketItems = await _context.BasketItems
                 .Include(b => b.Product)
@@ -262,6 +313,26 @@ namespace NewarkITStore.Controllers
                 .Where(c => c.UserId == userId)
                 .ToListAsync();
 
+            var today = DateTime.Today;
+            var activeOffers = await _context.Offers
+                .Where(o => o.StartDate <= today && o.EndDate >= today)
+                .ToListAsync();
+
+            bool isEligibleForOffer = user.Status == "Gold" || user.Status == "Platinum";
+
+            foreach (var item in basketItems)
+            {
+                var matchingOffer = activeOffers.FirstOrDefault(o => o.ProductId == item.ProductId);
+                if (matchingOffer != null && isEligibleForOffer)
+                {
+                    item.PricePerUnit = matchingOffer.OfferPrice;
+                }
+                else
+                {
+                    item.PricePerUnit = item.Product.RecommendedPrice;
+                }
+            }
+
             if (!basketItems.Any())
             {
                 TempData["Error"] = "Your cart is empty.";
@@ -275,6 +346,7 @@ namespace NewarkITStore.Controllers
                 SavedCards = cards
             });
         }
+
 
 
     }

@@ -20,6 +20,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<CreditCard> CreditCards { get; set; }
     public DbSet<ShippingAddress> ShippingAddresses { get; set; }
 
+    public DbSet<Offer> Offers { get; set; }
 
 
 

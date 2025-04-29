@@ -15,8 +15,8 @@
 
 <h2 class="mb-4">Review Your Order</h2>
 
-<table class="table table-bordered">
-    <thead class="table-light">
+<table class="table">
+    <thead>
         <tr>
             <th>Product</th>
             <th>Qty</th>
@@ -28,14 +28,34 @@
         @foreach (var item in Model.BasketItems)
         {
             <tr>
-                <td>@item.Product.Name</td>
+                <td>
+                    @item.Product.Name
+                    @if (item.Product.RecommendedPrice > item.PricePerUnit)
+                    {
+                        <span class="badge rounded-pill bg-success ms-2">Offer Applied!</span>
+                    }
+                </td>
                 <td>@item.Quantity</td>
-                <td>@item.PricePerUnit.ToString("C")</td>
-                <td>@((item.Quantity * item.PricePerUnit).ToString("C"))</td>
+                <td>
+                    @if (item.Product.RecommendedPrice > item.PricePerUnit)
+                    {
+                        <span class="text-muted text-decoration-line-through me-1">
+                            @(item.Product.RecommendedPrice.ToString("C"))
+                        </span>
+                        <span class="text-success fw-bold">@(item.PricePerUnit.ToString("C"))</span>
+                    }
+                    else
+                    {
+                        @(item.PricePerUnit.ToString("C"))
+                    }
+                </td>
+                <td>@((item.PricePerUnit * item.Quantity).ToString("C"))</td>
             </tr>
         }
     </tbody>
 </table>
+
+
 
 <h4 class="text-end">Subtotal: @subtotal.ToString("C")</h4>
 <h4 class="text-end">Tax (10%): @tax.ToString("C")</h4>

@@ -31,12 +31,27 @@
 
                     @if (offer != null && isEligible)
                     {
+                        var daysLeft = (offer.EndDate - DateTime.Today).Days;
+
                         <p>
                             <strong>Price:</strong>
                             <span class="text-muted text-decoration-line-through">$@product.RecommendedPrice</span>
                             <span class="text-success fw-bold ms-2">$@offer.OfferPrice</span>
                             <span class="badge bg-success ms-2">Offer!</span>
                         </p>
+
+                        @if (daysLeft > 0)
+                        {
+                            <p class="text-danger fw-bold">
+                                Limited Offer! Ends in @daysLeft day@(daysLeft > 1 ? "s" : "")!
+                            </p>
+                        }
+                        else
+                        {
+                            <p class="text-danger fw-bold">
+                                Last day to get this offer!
+                            </p>
+                        }
                     }
                     else
                     {

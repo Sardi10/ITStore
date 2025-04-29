@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NewarkITStore.Data;
 
@@ -11,9 +12,11 @@ using NewarkITStore.Data;
 namespace NewarkITStore.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250429022334_AddOfferTable")]
+    partial class AddOfferTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -326,33 +329,6 @@ namespace NewarkITStore.Data.Migrations
                     b.ToTable("CreditCards");
                 });
 
-            modelBuilder.Entity("NewarkITStore.Models.Offer", b =>
-                {
-                    b.Property<int>("OfferId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OfferId"));
-
-                    b.Property<DateTime>("EndDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<decimal>("OfferPrice")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int>("ProductId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("StartDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("OfferId");
-
-                    b.HasIndex("ProductId");
-
-                    b.ToTable("Offers");
-                });
-
             modelBuilder.Entity("NewarkITStore.Models.Order", b =>
                 {
                     b.Property<int>("OrderId")
@@ -603,17 +579,6 @@ namespace NewarkITStore.Data.Migrations
                         .HasForeignKey("UserId");
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("NewarkITStore.Models.Offer", b =>
-                {
-                    b.HasOne("NewarkITStore.Models.Product", "Product")
-                        .WithMany()
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("NewarkITStore.Models.Order", b =>

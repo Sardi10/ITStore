@@ -16,15 +16,46 @@
             <th>Action</th>
         </tr>
     </thead>
-    <tbody id="cart-body">
+    <tbody>
         @foreach (var item in Model)
         {
-            <tr id="row-@item.BasketItemId">
-                @await Html.PartialAsync("_BasketRow", item)
+            <tr>
+                <td>
+                    @item.Product.Name
+                    @if (item.Product.RecommendedPrice > item.PricePerUnit)
+                    {
+                        <span class="badge rounded-pill bg-success ms-2">Offer Applied!</span>
+                    }
+                </td>
+                <td>
+                    @if (item.Product.RecommendedPrice > item.PricePerUnit)
+                    {
+                        <span class="text-muted text-decoration-line-through me-1">
+                            @(item.Product.RecommendedPrice.ToString("C"))
+                        </span>
+                        <span class="text-success fw-bold">@(item.PricePerUnit.ToString("C"))</span>
+                    }
+                    else
+                    {
+                        @(item.PricePerUnit.ToString("C"))
+                    }
+                </td>
+                <td>@item.Quantity</td>
+                <td>@((item.PricePerUnit * item.Quantity).ToString("C"))</td>
+                <td>
+                    <form asp-action="Remove" method="post">
+                        <input type="hidden" name="basketItemId" value="@item.BasketItemId" />
+                        <button type="submit" class="btn btn-sm btn-danger">
+                            <i class="bi bi-trash"></i> Remove
+                        </button>
+                    </form>
+                </td>
             </tr>
+
         }
     </tbody>
 </table>
+
 
     
 <div id="cart-summary">

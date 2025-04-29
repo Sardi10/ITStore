@@ -24,7 +24,25 @@
                     <h5 class="card-title">@product.Name</h5>
                     <h6 class="card-subtitle text-muted">@product.ProductType?.Name</h6>
                     <p class="card-text">@product.Description</p>
-                    <p><strong>Price:</strong> $@product.RecommendedPrice</p>
+                    @{
+                        var offer = ((List<NewarkITStore.Models.Offer>)ViewBag.Offers)?.FirstOrDefault(o => o.ProductId == product.ProductId);
+                        bool isEligible = ViewBag.UserStatus == "Gold" || ViewBag.UserStatus == "Platinum";
+                    }
+
+                    @if (offer != null && isEligible)
+                    {
+                        <p>
+                            <strong>Price:</strong>
+                            <span class="text-muted text-decoration-line-through">$@product.RecommendedPrice</span>
+                            <span class="text-success fw-bold ms-2">$@offer.OfferPrice</span>
+                            <span class="badge bg-success ms-2">Offer!</span>
+                        </p>
+                    }
+                    else
+                    {
+                        <p><strong>Price:</strong> $@product.RecommendedPrice</p>
+                    }
+
                     @* <p><strong>Stock:</strong> @product.QuantityInStock</p> *@
                     @* <form asp-controller="Basket" asp-action="Add" method="post"> *@
                     @*     <input type="hidden" name="productId" value="@product.ProductId" /> *@

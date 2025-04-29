@@ -1,162 +1,170 @@
-﻿@model NewarkITStore.ViewModels.AdminDashboardViewModel
+﻿@model NewarkITStore.ViewModels.SalesStatisticsViewModel
 
 @{
-    ViewData["Title"] = "Admin Dashboard";
+    ViewData["Title"] = "Sales Dashboard";
 }
-<div id="pdfContent" class="border p-4 bg-white">
-<h2 class="mb-4">Admin Dashboard</h2>
 
+<h2 class="mt-4">@ViewData["Title"]</h2>
+
+<form method="get" class="row mb-4 mt-3">
+    <div class="col-md-3">
+        <label>From</label>
+        <input type="date" name="startDate" class="form-control" value="@ViewBag.StartDate" />
+    </div>
+    <div class="col-md-3">
+        <label>To</label>
+        <input type="date" name="endDate" class="form-control" value="@ViewBag.EndDate" />
+    </div>
+    <div class="col-md-3 mt-4">
+        <button type="submit" class="btn btn-primary mt-2">Filter</button>
+    </div>
+</form>
+
+<!-- KPI Summary Cards -->
 <div class="row mb-4">
-    <div class="col-md-4">
+    <div class="col-md-3">
         <div class="card text-white bg-primary mb-3">
+            <div class="card-header">Total Revenue</div>
             <div class="card-body">
-                <h5 class="card-title">Total Revenue</h5>
-                <p class="card-text display-6">@Model.TotalRevenue.ToString("C")</p>
+                <h5 class="card-title">@Model.TotalRevenue.ToString("C")</h5>
             </div>
         </div>
     </div>
-    <div class="col-md-4">
+    <div class="col-md-3">
         <div class="card text-white bg-success mb-3">
+            <div class="card-header">Total Orders</div>
             <div class="card-body">
-                <h5 class="card-title">Total Orders</h5>
-                <p class="card-text display-6">@Model.TotalOrders</p>
+                <h5 class="card-title">@Model.NumberOfOrders</h5>
             </div>
         </div>
     </div>
-    <div class="col-md-4">
+    <div class="col-md-3">
+        <div class="card text-white bg-warning mb-3">
+            <div class="card-header">Average Order Value</div>
+            <div class="card-body">
+                <h5 class="card-title">@Model.AverageOrderValue.ToString("C")</h5>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
         <div class="card text-white bg-info mb-3">
+            <div class="card-header">Unique Customers</div>
             <div class="card-body">
-                <h5 class="card-title">Total Customers</h5>
-                <p class="card-text display-6">@Model.TotalUsers</p>
+                <h5 class="card-title">@Model.NumberOfUniqueCustomers</h5>
             </div>
         </div>
-    </div>
-        <h4 class="mt-4 ">Top Selling Products (Chart)</h4>
-
-        <form method="get" class="row g-2 mb-4 mt-3">
-            <div class="col-md-3">
-                <label>Start Date</label>
-                <input type="date" name="startDate" value="@ViewBag.StartDate" class="form-control" />
-            </div>
-            <div class="col-md-3">
-                <label>End Date</label>
-                <input type="date" name="endDate" value="@ViewBag.EndDate" class="form-control" />
-            </div>
-            <div class="col-md-2 align-self-end">
-                <button class="btn btn-primary w-100">Filter</button>
-            </div>
-        </form>
-        <canvas id="topSellingChart" width="200" height="100"></canvas>
-
-        <button id="downloadChart" class="btn btn-outline-secondary mb-3 mt-2">
-            Download Chart as PNG
-        </button>
-    <div class="mb-4">
-        <a asp-action="ExportCsv" asp-route-startDate="@ViewBag.StartDate" asp-route-endDate="@ViewBag.EndDate" class="btn btn-outline-secondary me-2">
-            <i class="bi bi-file-earmark-spreadsheet"></i> Export to CSV
-        </a>
-        <button id="downloadPdfBtn" class="btn btn-outline-danger">
-            <i class="bi bi-file-earmark-pdf"></i> Download PDF
-        </button>
     </div>
 </div>
 
+<!-- Loading Spinner and Chart -->
+<div id="chartLoader" class="d-flex justify-content-center align-items-center" style="height: 150px;">
+    <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+</div>
 
-<p><strong>@ViewBag.RangeMessage</strong></p>
+<canvas id="revenueChart" class="d-none" height="120"></canvas>
 
-
-<hr />
-
-<h4 class="mt-4">Top Selling Products</h4>
-<table class="table table-striped mt-3">
-    <thead>
-        <tr>
-            <th>#</th>
-            <th>Product</th>
-            <th>Quantity Sold</th>
-        </tr>
-    </thead>
-    <tbody>
-        @if (Model.TopSellingProducts.Any())
-        {
-            int rank = 1;
-            foreach (var product in Model.TopSellingProducts)
-            {
-                <tr>
-                    <td>@rank</td>
-                    <td>@product.ProductName</td>
-                    <td>@product.QuantitySold</td>
-                </tr>
-                rank++;
-            }
-        }
-        else
-        {
-            <tr>
-                <td colspan="3" class="text-center">No sales data available.</td>
-            </tr>
-        }
-    </tbody>
-</table>
+<div class="mt-4">
+    <button id="downloadChartBtn" class="btn btn-outline-primary me-2">Download Chart as Image</button>
+    <button id="downloadCsvBtn" class="btn btn-outline-success me-2">Download CSV</button>
+    <button id="downloadPdfBtn" class="btn btn-outline-danger">Download PDF</button>
 </div>
 
 @section Scripts {
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 
     <script>
-        // Sample data (replace with dynamic @Model data)
-        let productNames = @Html.Raw(Json.Serialize(Model.TopSellingProducts.Select(p => p.ProductName)));
-        let productQuantities = @Html.Raw(Json.Serialize(Model.TopSellingProducts.Select(p => p.QuantitySold)));
+        const ctx = document.getElementById('revenueChart').getContext('2d');
 
-        const ctx = document.getElementById('topSellingChart').getContext('2d');
+        const dates = @Html.Raw(Json.Serialize(Model.DailyRevenues.Select(d => d.Date.ToString("yyyy-MM-dd"))));
+        const revenues = @Html.Raw(Json.Serialize(Model.DailyRevenues.Select(d => d.Revenue)));
+
         const chart = new Chart(ctx, {
-            type: 'bar',
+            type: 'line',
             data: {
-                labels: productNames,
+                labels: dates,
                 datasets: [{
-                    label: 'Units Sold',
-                    data: productQuantities,
-                    backgroundColor: 'rgba(54, 162, 235, 0.6)'
+                    label: 'Revenue',
+                    data: revenues,
+                    fill: false,
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    tension: 0.3
                 }]
             },
             options: {
                 responsive: true,
+                animation: {
+                    duration: 1500, // 1.5 seconds animation
+                    easing: 'easeOutBounce'
+                },
                 plugins: {
                     title: {
                         display: true,
-                        text: 'Top Selling Products'
+                        text: 'Revenue Over Time'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return "Revenue: $" + context.parsed.y.toFixed(2);
+                            }
+                        }
+                    },
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
                     }
                 }
             }
         });
 
-        // Download as image
-        document.getElementById('downloadChart').addEventListener('click', function () {
+        // Hide spinner, show chart once ready
+        document.getElementById('chartLoader').classList.add('d-none');
+        document.getElementById('revenueChart').classList.remove('d-none');
+
+        // Download Chart as Image
+        document.getElementById('downloadChartBtn').addEventListener('click', function () {
+            const a = document.createElement('a');
+            a.href = chart.toBase64Image();
+            a.download = 'revenue_chart.png';
+            a.click();
+        });
+
+        // Download CSV
+        document.getElementById('downloadCsvBtn').addEventListener('click', function () {
+            let csvContent = "data:text/csv;charset=utf-8,Date,Revenue\n";
+            dates.forEach((date, i) => {
+                csvContent += `${date},$${revenues[i].toFixed(2)}\n`;
+            });
+            const encodedUri = encodeURI(csvContent);
             const link = document.createElement('a');
-            link.href = chart.toBase64Image();
-            link.download = 'top-selling-products.png';
+            link.setAttribute('href', encodedUri);
+            link.setAttribute('download', 'revenue_over_time.csv');
+            document.body.appendChild(link);
             link.click();
+            document.body.removeChild(link);
+        });
+
+        // Download Chart as PDF-
+        document.getElementById('downloadPdfBtn').addEventListener('click', async function () {
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF();
+            const content = document.getElementById('revenueChart');
+
+            await html2canvas(content).then(canvas => {
+                const imgData = canvas.toDataURL('image/png');
+                const imgProps = pdf.getImageProperties(imgData);
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+                pdf.addImage(imgData, 'PNG', 0, 10, pdfWidth, pdfHeight);
+                pdf.save("revenue_over_time.pdf");
+            });
         });
     </script>
-
-
-    <script>
-        document.getElementById("downloadPdfBtn").addEventListener("click", function () {
-            const element = document.getElementById("pdfContent");
-
-            html2pdf()
-                .from(element)
-                .set({
-                    margin: 0.5,
-                    filename: 'dashboard_report.pdf',
-                    image: { type: 'jpeg', quality: 0.98 },
-                    html2canvas: { scale: 2 },
-                    jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-                })
-                .save();
-        });
-    </script>
-
 }

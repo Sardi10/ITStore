@@ -19,7 +19,7 @@ namespace NewarkITStore.Controllers
         }
 
         // GET: AdminOrders
-        public async Task<IActionResult> Index(string searchEmail, OrderStatus? filterStatus)
+        public async Task<IActionResult> Index(string searchEmail, OrderStatus? filterStatus, DateTime? startDate, DateTime? endDate)
         {
             var query = _context.Orders
                 .Include(o => o.User)
@@ -37,6 +37,17 @@ namespace NewarkITStore.Controllers
                 query = query.Where(o => o.Status == filterStatus.Value);
             }
 
+            if (startDate.HasValue)
+            {
+                query = query.Where(o => o.OrderDate >= startDate.Value);
+            }
+
+            if (endDate.HasValue)
+            {
+                // Make endDate inclusive by adding 1 day and subtracting a small tick
+                query = query.Where(o => o.OrderDate <= endDate.Value.Date.AddDays(1).AddTicks(-1));
+            }
+
             var orders = await query.Select(o => new AdminOrderViewModel
             {
                 OrderId = o.OrderId,
@@ -50,17 +61,15 @@ namespace NewarkITStore.Controllers
                     PricePerUnit = oi.PricePerUnit
                 }).ToList(),
                 ShippingAddressSummary = o.ShippingAddress != null
-                ? $"{o.ShippingAddress.AddressName} - {o.ShippingAddress.Street}, {o.ShippingAddress.City}, {o.ShippingAddress.State},{o.ShippingAddress.Country}, {o.ShippingAddress.Zip}"
-                : "N/A",
-
+                    ? $"{o.ShippingAddress.AddressName} - {o.ShippingAddress.Street}, {o.ShippingAddress.City}, {o.ShippingAddress.State}, {o.ShippingAddress.Country}, {o.ShippingAddress.Zip}"
+                    : "N/A",
                 MaskedCard = o.CreditCard != null && !string.IsNullOrEmpty(o.CreditCard.CardNumber)
-                ? $"**** **** **** {o.CreditCard.CardNumber.Substring(o.CreditCard.CardNumber.Length - 4)}"
-                : "N/A"
+                    ? $"**** **** **** {o.CreditCard.CardNumber.Substring(o.CreditCard.CardNumber.Length - 4)}"
+                    : "N/A"
             }).ToListAsync();
 
             return View(orders);
-        
-    }
+        }
 
 
         // GET: AdminOrders/Details/5

@@ -170,9 +170,9 @@ namespace NewarkITStore.Controllers
         public async Task<IActionResult> TopSellingProducts(DateTime? startDate, DateTime? endDate, string category, int topN = 10, string sortBy = "revenue")
         {
             var query = _context.OrderItems
-            .Include(oi => oi.Product)
-            .Include(oi => oi.Order)
-            .AsQueryable();
+                .Include(oi => oi.Product)
+                .Include(oi => oi.Order)
+                .AsQueryable();
 
             if (startDate.HasValue)
                 query = query.Where(oi => oi.Order.OrderDate >= startDate.Value);
@@ -189,19 +189,22 @@ namespace NewarkITStore.Controllers
                 {
                     ProductName = g.Key,
                     UnitsSold = g.Sum(oi => oi.Quantity),
-                    TotalRevenue = g.Sum(oi => oi.Quantity * oi.PricePerUnit * 1.1m)
+                    TotalRevenue = g.Sum(oi => oi.Quantity * oi.PricePerUnit * 1.1m) // 10% tax
                 })
                 .ToListAsync();
 
-            // Sort based on selection
+            // Sort based on selected option
             data = sortBy.ToLower() == "units"
                 ? data.OrderByDescending(x => x.UnitsSold).Take(topN).ToList()
                 : data.OrderByDescending(x => x.TotalRevenue).Take(topN).ToList();
 
-            ViewBag.SortBy = sortBy; 
-            return View(data);
+            // Pass sortBy to View
+            ViewBag.SortBy = sortBy;
+            ViewBag.TopN = topN;
 
+            return View(data);
         }
+
 
         public async Task<IActionResult> TopProductsByCustomers(DateTime? startDate, DateTime? endDate, int topN = 10)
         {
@@ -231,6 +234,33 @@ namespace NewarkITStore.Controllers
             return View(result);
         }
 
+        public async Task<IActionResult> MaxBasketPerCard(DateTime? startDate, DateTime? endDate, int topN = 10)
+        {
+            var query = _context.Orders
+                .Include(o => o.User)
+                .Include(o => o.CreditCard)
+                .AsQueryable();
+
+            if (startDate.HasValue)
+                query = query.Where(o => o.OrderDate >= startDate.Value);
+
+            if (endDate.HasValue)
+                query = query.Where(o => o.OrderDate <= endDate.Value.Date.AddDays(1).AddSeconds(-1));
+
+            var data = await query
+                .GroupBy(o => new { o.User.Email, o.CreditCard.CardNumber })
+                .Select(g => new MaxBasketPerCardViewModel
+                {
+                    UserEmail = g.Key.Email,
+                    MaskedCardNumber = "**** **** **** " + g.Key.CardNumber.Substring(g.Key.CardNumber.Length - 4),
+                    MaxBasketTotal = g.Max(o => o.OrderItems.Sum(oi => oi.PricePerUnit * oi.Quantity * 1.1m)) // assuming 10% tax
+                })
+                .OrderByDescending(x => x.MaxBasketTotal)
+                .Take(topN)
+                .ToListAsync();
+
+            return View(data);
+        }
 
     }
 }

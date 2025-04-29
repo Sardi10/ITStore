@@ -32,6 +32,20 @@
         </div>
     </div>
         <h4 class="mt-4 ">Top Selling Products (Chart)</h4>
+
+        <form method="get" class="row g-2 mb-4 mt-3">
+            <div class="col-md-3">
+                <label>Start Date</label>
+                <input type="date" name="startDate" value="@ViewBag.StartDate" class="form-control" />
+            </div>
+            <div class="col-md-3">
+                <label>End Date</label>
+                <input type="date" name="endDate" value="@ViewBag.EndDate" class="form-control" />
+            </div>
+            <div class="col-md-2 align-self-end">
+                <button class="btn btn-primary w-100">Filter</button>
+            </div>
+        </form>
         <canvas id="topSellingChart" width="200" height="100"></canvas>
 
         <button id="downloadChart" class="btn btn-outline-secondary mb-3 mt-2">
@@ -46,19 +60,7 @@
         </button>
     </div>
 </div>
-<form method="get" class="row g-2 mb-4">
-    <div class="col-md-3">
-        <label>Start Date</label>
-        <input type="date" name="startDate" value="@ViewBag.StartDate" class="form-control" />
-    </div>
-    <div class="col-md-3">
-        <label>End Date</label>
-        <input type="date" name="endDate" value="@ViewBag.EndDate" class="form-control" />
-    </div>
-    <div class="col-md-2 align-self-end">
-        <button class="btn btn-primary w-100">Filter</button>
-    </div>
-</form>
+
 
 <p><strong>@ViewBag.RangeMessage</strong></p>
 

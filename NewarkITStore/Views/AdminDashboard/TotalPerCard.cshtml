@@ -6,21 +6,7 @@
 
 <h2>@ViewData["Title"]</h2>
 
-<canvas id="totalPerCardChart" width="600" height="200"></canvas>
-
-<button id="downloadChartBtn" class="btn btn-outline-primary mt-3 mb-3 ms-2">
-    Download Chart as Image
-</button>
-
-
-<button id="downloadCsvBtn" class="btn btn-outline-success mt-3 mb-3">
-    Download CSV
-</button>
-<button id="downloadPdfBtn" class="btn btn-outline-danger mt-3 mb-3 ms-2">
-    Download PDF
-</button>
-
-<form method="get" class="mb-4">
+<form method="get" class="mb-4 mt-3">
     <div class="row row-cols-lg-auto g-3 align-items-center mb-2">
         <div class="col">
             <input type="text" name="email" value="@Context.Request.Query["email"]" class="form-control" placeholder="Email" />
@@ -51,6 +37,22 @@
     </div>
 </form>
 
+<canvas id="totalPerCardChart" width="600" height="200"></canvas>
+
+<button id="downloadChartBtn" class="btn btn-outline-primary mt-3 mb-3 ms-2">
+    Download Chart as Image
+</button>
+
+
+<button id="downloadCsvBtn" class="btn btn-outline-success mt-3 mb-3">
+    Download CSV
+</button>
+<button id="downloadPdfBtn" class="btn btn-outline-danger mt-3 mb-3 ms-2">
+    Download PDF
+</button>
+
+
+
 
 
 
@@ -79,13 +81,20 @@
 
     <script>
         const ctx = document.getElementById('totalPerCardChart').getContext('2d');
+
+        const fullLabels = @Html.Raw(Json.Serialize(Model.Select(x => x.UserEmail + " (" + x.MaskedCardNumber + ")")));
+        const totals = @Html.Raw(Json.Serialize(Model.Select(x => x.TotalCharged)));
+
+        // Short labels just like #1, #2, #3...
+        const shortLabels = fullLabels.map((_, index) => `#${index + 1}`);
+
         const chart = new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: @Html.Raw(Json.Serialize(Model.Select(x => x.UserEmail + " (" + x.MaskedCardNumber + ")"))),
+                labels: shortLabels, // Short simple labels under bars
                 datasets: [{
                     label: 'Total Charged',
-                    data: @Html.Raw(Json.Serialize(Model.Select(x => x.TotalCharged))),
+                    data: totals,
                     backgroundColor: 'rgba(54, 162, 235, 0.6)'
                 }]
             },
@@ -95,11 +104,36 @@
                     title: {
                         display: true,
                         text: 'Total Charged per Credit Card'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            title: function(context) {
+                                const index = context[0].dataIndex;
+                                return fullLabels[index]; // Full user email + card in tooltip
+                            },
+                            label: function(context) {
+                                return "Total Charged: $" + context.parsed.y.toFixed(2);
+                            }
+                        }
+                    },
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: {
+                            display: false // Hides even the short #1, #2 if you want super clean
+                        }
+                    },
+                    y: {
+                        beginAtZero: true
                     }
                 }
             }
         });
     </script>
+
 
     <script>
         const creditCardStats = @Html.Raw(Json.Serialize(Model));

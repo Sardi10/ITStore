@@ -262,5 +262,35 @@ namespace NewarkITStore.Controllers
             return View(data);
         }
 
+        public async Task<IActionResult> AveragePriceByType(DateTime? startDate, DateTime? endDate)
+        {
+            var query = _context.OrderItems
+                .Include(oi => oi.Product)
+                .Include(oi => oi.Order)
+                .AsQueryable();
+
+            if (startDate.HasValue)
+                query = query.Where(oi => oi.Order.OrderDate >= startDate.Value);
+
+            if (endDate.HasValue)
+            {
+                var endOfDay = endDate.Value.Date.AddDays(1).AddTicks(-1);
+                query = query.Where(oi => oi.Order.OrderDate <= endOfDay);
+            }
+
+            var data = await query
+                .GroupBy(oi => oi.Product.ProductType)
+                .Select(g => new AveragePriceByProductTypeViewModel
+                {
+                    ProductType = g.Key,
+                    AveragePrice = g.Average(oi => oi.PricePerUnit)
+                })
+                .OrderByDescending(x => x.AveragePrice)
+                .ToListAsync();
+
+            return View(data);
+        }
+
+
     }
 }

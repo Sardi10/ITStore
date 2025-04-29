@@ -21,47 +21,48 @@ namespace NewarkITStore.Controllers
         public async Task<IActionResult> Index(DateTime? startDate, DateTime? endDate)
         {
             var today = DateTime.Today;
-            startDate ??= today.AddDays(-30); // default: 30 days ago
+
+            startDate ??= today.AddDays(-30); // Default: last 30 days
             endDate ??= today;
 
-            ViewBag.StartDate = startDate.Value.ToString("yyyy-MM-dd");
-            ViewBag.EndDate = endDate.Value.ToString("yyyy-MM-dd");
-            ViewBag.RangeMessage = (startDate == today.AddDays(-30) && endDate == today)
-                ? "Showing stats for the last 30 days"
-                : $"Showing stats from {startDate:MM/dd/yyyy} to {endDate:MM/dd/yyyy}";
+            var query = _context.Orders
+                .Include(o => o.User)
+                .AsQueryable();
 
-            var ordersInRange = await _context.Orders
-                .Where(o => o.OrderDate >= startDate && o.OrderDate <= endDate)
-                .ToListAsync();
+            if (startDate.HasValue)
+                query = query.Where(o => o.OrderDate >= startDate.Value);
 
-            var totalRevenue = ordersInRange.Sum(o => o.TotalAmount);
-            var totalOrders = ordersInRange.Count;
-
-            var totalUsers = await _context.Users.CountAsync();
-
-            var topProducts = await _context.OrderItems
-                .Include(oi => oi.Product)
-                .Where(oi => oi.Order.OrderDate >= startDate && oi.Order.OrderDate <= endDate)
-                .GroupBy(oi => oi.Product.Name)
-                .Select(g => new AdminDashboardViewModel.TopProduct
-                {
-                    ProductName = g.Key,
-                    QuantitySold = g.Sum(x => x.Quantity)
-                })
-                .OrderByDescending(p => p.QuantitySold)
-                .Take(5)
-                .ToListAsync();
-
-            var model = new AdminDashboardViewModel
+            if (endDate.HasValue)
             {
-                TotalRevenue = totalRevenue,
-                TotalOrders = totalOrders,
-                TotalUsers = totalUsers,
-                TopSellingProducts = topProducts
+                var endOfDay = endDate.Value.Date.AddDays(1).AddTicks(-1);
+                query = query.Where(o => o.OrderDate <= endOfDay);
+            }
+
+            var orders = await query.ToListAsync();
+
+            var viewModel = new SalesStatisticsViewModel
+            {
+                TotalRevenue = orders.Sum(o => o.TotalAmount),
+                NumberOfOrders = orders.Count,
+                AverageOrderValue = orders.Count > 0 ? orders.Average(o => o.TotalAmount) : 0,
+                NumberOfUniqueCustomers = orders.Select(o => o.User.Id).Distinct().Count(),
+                DailyRevenues = orders
+                    .GroupBy(o => o.OrderDate.Date)
+                    .Select(g => new DailyRevenueData
+                    {
+                        Date = g.Key,
+                        Revenue = g.Sum(o => o.TotalAmount)
+                    })
+                    .OrderBy(d => d.Date)
+                    .ToList()
             };
 
-            return View(model);
+            ViewBag.StartDate = startDate?.ToString("yyyy-MM-dd");
+            ViewBag.EndDate = endDate?.ToString("yyyy-MM-dd");
+
+            return View(viewModel);
         }
+
 
         [HttpGet]
         public async Task<IActionResult> ExportCsv(DateTime? startDate, DateTime? endDate)

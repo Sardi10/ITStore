@@ -279,7 +279,7 @@ namespace NewarkITStore.Controllers
             }
 
             var data = await query
-                .GroupBy(oi => oi.Product.ProductType)
+               .GroupBy(oi => oi.Product.ProductType.Name)
                 .Select(g => new AveragePriceByProductTypeViewModel
                 {
                     ProductType = g.Key,

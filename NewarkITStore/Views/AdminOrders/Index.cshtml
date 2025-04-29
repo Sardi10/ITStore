@@ -1,7 +1,6 @@
-﻿ @model List<NewarkITStore.ViewModels.AdminOrderViewModel>  
+﻿@model List<NewarkITStore.ViewModels.AdminOrderViewModel>
 @using NewarkITStore.Models
 @using static NewarkITStore.Models.Order
-
 
 @{
     ViewData["Title"] = "All Orders";
@@ -27,131 +26,114 @@
     };
 }
 
-<h2>All Orders</h2>
+<div class="container">
+    <h2 class="fw-bold mb-4"><i class="bi bi-truck"></i> All Orders</h2>
 
-<form asp-action="Index" method="get" class="mb-4">
-    <div class="row">
-        <div class="col-md-3 mb-2">
-            <input type="text" name="searchEmail" value="@Context.Request.Query["searchEmail"]"
-                   class="form-control" placeholder="Search by email..." />
+    <form asp-action="Index" method="get" class="mb-4">
+        <div class="row g-2">
+            <div class="col-md-3">
+                <input type="text" name="searchEmail" value="@Context.Request.Query["searchEmail"]"
+                       class="form-control" placeholder="Search by email..." />
+            </div>
+            <div class="col-md-2">
+                <select name="filterStatus" class="form-select">
+                    <option value="">All Statuses</option>
+                    @foreach (var status in Enum.GetValues(typeof(OrderStatus)))
+                    {
+                        var isSelected = Context.Request.Query["filterStatus"] == status.ToString() ? "selected" : "";
+                        @Html.Raw($"<option value=\"{status}\" {isSelected}>{status}</option>")
+                    }
+                </select>
+            </div>
+            <div class="col-md-2">
+                <input type="date" name="startDate" value="@Context.Request.Query["startDate"]" class="form-control" />
+            </div>
+            <div class="col-md-2">
+                <input type="date" name="endDate" value="@Context.Request.Query["endDate"]" class="form-control" />
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="bi bi-filter-circle"></i> Filter
+                </button>
+            </div>
         </div>
+    </form>
 
-        <div class="col-md-2 mb-2">
-            <select name="filterStatus" class="form-control">
-                <option value="">All Statuses</option>
-                @foreach (var status in Enum.GetValues(typeof(OrderStatus)))
-                {
-                    var isSelected = Context.Request.Query["filterStatus"] == status.ToString() ? "selected" : "";
-                    @Html.Raw($"<option value=\"{status}\" {isSelected}>{status}</option>")
-                }
-            </select>
-
-        </div>
-
-        <div class="col-md-2 mb-2">
-            <input type="date" name="startDate" value="@Context.Request.Query["startDate"]"
-                   class="form-control" placeholder="Start Date" />
-        </div>
-
-        <div class="col-md-2 mb-2">
-            <input type="date" name="endDate" value="@Context.Request.Query["endDate"]"
-                   class="form-control" placeholder="End Date" />
-        </div>
-
-        <div class="col-md-2 mb-2">
-            <button type="submit" class="btn btn-primary w-100">Filter</button>
-        </div>
-    </div>
-</form>
-
-
-@if (!string.IsNullOrEmpty(Context.Request.Query["searchEmail"]) || !string.IsNullOrEmpty(Context.Request.Query["filterStatus"]))
-{
-    <p>
-        Showing results for:
-        @if (!string.IsNullOrEmpty(Context.Request.Query["searchEmail"]))
-        {
-            <strong>Email:</strong> @Context.Request.Query["searchEmail"]
-        }
-        @if (!string.IsNullOrEmpty(Context.Request.Query["filterStatus"]))
-        {
-            <strong>Status:</strong> @Context.Request.Query["filterStatus"]
-        }
-    </p>
-}
-
-<table class="table table-bordered">
-    <thead class="table-light">
-        <tr>
-            <th>Order #</th>
-            <th>Email</th>
-            <th>Date</th>
-            <th>Shipping Address</th>
-            <th>Paid With</th>
-            <th>Status</th>
-            <th>Total</th>
-            <th>Update</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var order in Model)
-        {
-            <tr>
-                <td>@order.OrderId</td>
-                <td>@order.UserEmail</td>
-                <td>@order.OrderDate.ToShortDateString()</td>
-                <td>@order.ShippingAddressSummary</td>
-                <td>@order.MaskedCard</td>
-                <td>
-                    <form asp-action="UpdateStatus" method="post" class="d-flex">
-                        <input type="hidden" name="id" value="@order.OrderId" />
-
-                        @{
-                            var selectClass = "form-select form-select-sm me-2 " + GetSelectBorderColor(order.Status);
-                        }
-
-                        <select name="newStatus" class="@selectClass">
-                            @foreach (OrderStatus status in Enum.GetValues(typeof(OrderStatus)))
-                            {
-                                var isSelected = order.Status == status ? " selected" : "";
-                                var optionClass = GetOptionColor(status);
-                                @Html.Raw($"<option class=\"{optionClass}\" value=\"{status}\"{isSelected}>{status}</option>")
-                            }
-                        </select>
-
-                        <button type="submit" class="btn btn-sm btn-outline-success">✓</button>
-                    </form>
-
-
-                </td>
-                <td>@order.Total.ToString("C")</td>
-                <td>
-                    <a asp-action="Details" asp-route-id="@order.OrderId" class="btn btn-sm btn-outline-primary">View</a>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
-
-
-@functions {
-    private string GetStatusColor(OrderStatus status)
+    @if (!string.IsNullOrEmpty(Context.Request.Query["searchEmail"]) || !string.IsNullOrEmpty(Context.Request.Query["filterStatus"]))
     {
-        return status switch
-        {
-            OrderStatus.Pending => "warning",
-            OrderStatus.Shipped => "info",
-            OrderStatus.Delivered => "success",
-            OrderStatus.Cancelled => "danger",
-            _ => "secondary"
-        };
+        <div class="mb-3">
+            <span class="badge bg-info text-dark">
+                Showing results for:
+                @if (!string.IsNullOrEmpty(Context.Request.Query["searchEmail"]))
+                {
+                    <strong> Email:</strong> @Context.Request.Query["searchEmail"]
+                }
+                @if (!string.IsNullOrEmpty(Context.Request.Query["filterStatus"]))
+                {
+                    <strong> Status:</strong> @Context.Request.Query["filterStatus"]
+                }
+            </span>
+        </div>
     }
-}
 
-@if (TempData["SuccessMessage"] != null)
-{
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        @TempData["SuccessMessage"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-}
+    <table class="table table-bordered align-middle shadow-sm">
+        <thead class="table-light text-center">
+            <tr>
+                <th>Order #</th>
+                <th>Email</th>
+                <th>Date</th>
+                <th>Shipping Address</th>
+                <th>Paid With</th>
+                <th>Status</th>
+                <th>Total</th>
+                <th>Update</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var order in Model)
+            {
+                <tr>
+                    <td class="text-center">@order.OrderId</td>
+                    <td>@order.UserEmail</td>
+                    <td class="text-nowrap">@order.OrderDate.ToShortDateString()</td>
+                    <td>@order.ShippingAddressSummary</td>
+                    <td>@order.MaskedCard</td>
+                    <td>
+                        <form asp-action="UpdateStatus" method="post" class="d-flex align-items-center">
+                            <input type="hidden" name="id" value="@order.OrderId" />
+
+                            @{
+                                var selectClass = "form-select form-select-sm me-2 " + GetSelectBorderColor(order.Status);
+                            }
+
+                            <select name="newStatus" class="@selectClass">
+                                @foreach (OrderStatus status in Enum.GetValues(typeof(OrderStatus)))
+                                {
+                                    var isSelected = order.Status == status ? "selected" : "";
+                                    var optionClass = GetOptionColor(status);
+                                    @Html.Raw($"<option class=\"{optionClass}\" value=\"{status}\" {isSelected}>{status}</option>")
+                                }
+                            </select>
+
+                            <button type="submit" class="btn btn-sm btn-outline-success">✓</button>
+                        </form>
+                    </td>
+                    <td class="fw-bold text-end">@order.Total.ToString("C")</td>
+                    <td class="text-center">
+                        <a asp-action="Details" asp-route-id="@order.OrderId" class="btn btn-sm btn-outline-primary">
+                            View
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+</div>

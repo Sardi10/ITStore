@@ -9,87 +9,103 @@
     var total = subtotal + tax;
 }
 
-<h2>Order #@Model.OrderId</h2>
-<p><strong>Order Date:</strong> @Model.OrderDate.ToShortDateString()</p>
-<p>
-    <strong>Status:</strong>
-    <span class="badge bg-@GetStatusColor(Model.Status)">
-        @Model.Status
-    </span>
-</p>
+<div class="container ">
+    <h2 class="fw-bold mb-3">Order #@Model.OrderId</h2>
 
-@if (Model.ShippingAddress != null)
-{
-    <p><strong>Shipping Address:</strong> @Model.ShippingAddress.AddressName - @Model.ShippingAddress.Street, @Model.ShippingAddress.City, @Model.ShippingAddress.State, @Model.ShippingAddress.Country, @Model.ShippingAddress.Zip</p>
-}
-else
-{
-    <p><strong>Shipping Address:</strong> N/A</p>
-}
+    <p><strong>Order Date:</strong> @Model.OrderDate.ToShortDateString()</p>
 
-@if (Model.CreditCard != null && !string.IsNullOrEmpty(Model.CreditCard.CardNumber))
-{
-    <p><strong>Paid with:</strong> **** **** **** @Model.CreditCard.CardNumber.Substring(Model.CreditCard.CardNumber.Length - 4)</p>
-}
-else
-{
-    <p><strong>Paid with:</strong> N/A</p>
-}
+    <p>
+        <strong>Status:</strong>
+        <span class="badge bg-@GetStatusColor(Model.Status)">
+            @Model.Status
+        </span>
+    </p>
 
-<hr />
+    @if (Model.ShippingAddress != null)
+    {
+        <p>
+            <strong>Shipping Address:</strong>
+            @Model.ShippingAddress.AddressName - @Model.ShippingAddress.Street, @Model.ShippingAddress.City,
+            @Model.ShippingAddress.State, @Model.ShippingAddress.Country, @Model.ShippingAddress.Zip
+        </p>
+    }
+    else
+    {
+        <p><strong>Shipping Address:</strong> N/A</p>
+    }
 
-<h4>Order Items</h4>
-<table class="table table-bordered">
-    <thead class="table-light">
-        <tr>
-            <th>Product</th>
-            <th>Price</th>
-            <th>Qty</th>
-            <th>Total</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model.OrderItems)
+    <p>
+        <strong>Paid with:</strong>
+        @if (Model.CreditCard != null && !string.IsNullOrEmpty(Model.CreditCard.CardNumber))
         {
-            <tr>
-                <td>@item.Product.Name</td>
-                <td>@item.PricePerUnit.ToString("C")</td>
-                <td>@item.Quantity</td>
-                <td>@((item.PricePerUnit * item.Quantity).ToString("C"))</td>
-            </tr>
+            <span>
+                **** **** **** @Model.CreditCard.CardNumber.Substring(Model.CreditCard.CardNumber.Length - 4)
+            </span>
         }
-    </tbody>
-</table>
+        else
+        {
+            <span>N/A</span>
+        }
+    </p>
 
-<div class="text-end">
-    <p><strong>Subtotal:</strong> @subtotal.ToString("C")</p>
-    <p><strong>Tax (10%):</strong> @tax.ToString("C")</p>
-    <p class="fs-5 fw-bold"><strong>Total:</strong> @total.ToString("C")</p>
-</div>
 
-<hr />
+    <hr />
 
-<h4>Update Order Status</h4>
-
-<form asp-action="UpdateStatus" method="post">
-    @Html.AntiForgeryToken()
-    <input type="hidden" name="id" value="@Model.OrderId" />
-
-    <div class="form-group">
-        <label for="newStatus">Status:</label>
-        <select name="newStatus" class="form-control" required>
-            @foreach (OrderStatus status in Enum.GetValues(typeof(OrderStatus)))
+    <h4 class="fw-semibold mb-3">Order Items</h4>
+    <table class="table table-bordered">
+        <thead class="table-light text-center">
+            <tr>
+                <th>Product</th>
+                <th>Price</th>
+                <th>Qty</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.OrderItems)
             {
-                <option value="@status" selected="@(status == Model.Status)">
-                    @status
-                </option>
+                <tr>
+                    <td>@item.Product.Name</td>
+                    <td>@item.PricePerUnit.ToString("C")</td>
+                    <td>@item.Quantity</td>
+                    <td>@((item.PricePerUnit * item.Quantity).ToString("C"))</td>
+                </tr>
             }
-        </select>
+        </tbody>
+    </table>
+
+    <div class="text-end">
+        <p><strong>Subtotal:</strong> @subtotal.ToString("C")</p>
+        <p><strong>Tax (10%):</strong> @tax.ToString("C")</p>
+        <p class="fs-4 fw-bold text-success"><strong>Total:</strong> @total.ToString("C")</p>
     </div>
 
-    <button type="submit" class="btn btn-primary mt-2">Update Status</button>
-    <a asp-action="Index" class="btn btn-secondary mt-2">Back to Orders</a>
-</form>
+    <hr />
+
+    <h4 class="fw-semibold mb-3">Update Order Status</h4>
+
+    <form asp-action="UpdateStatus" method="post" class="row g-2">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="id" value="@Model.OrderId" />
+
+        <div class="col-md-4">
+            <select name="newStatus" class="form-select" required>
+                @foreach (OrderStatus status in Enum.GetValues(typeof(OrderStatus)))
+                {
+                    <option value="@status" selected="@(status == Model.Status)">
+                        @status
+                    </option>
+                }
+            </select>
+        </div>
+        <div class="col-md-4">
+            <button type="submit" class="btn btn-primary w-100">Update Status</button>
+        </div>
+        <div class="col-md-4">
+            <a asp-action="Index" class="btn btn-secondary w-100">Back to Orders</a>
+        </div>
+    </form>
+</div>
 
 @functions {
     private string GetStatusColor(OrderStatus status)

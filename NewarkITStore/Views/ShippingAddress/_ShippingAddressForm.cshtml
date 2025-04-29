@@ -14,43 +14,53 @@
 }
 
 <div class="mb-3">
-    <label asp-for="AddressName" class="form-label">Address Name</label>
+    <label asp-for="AddressName" class="form-label">
+        <i class="bi bi-tag-fill me-1"></i>Address Name
+    </label>
     <input asp-for="AddressName" class="form-control" />
-    <span asp-validation-for="AddressName" class="text-danger"></span>
+    <span asp-validation-for="AddressName" class="text-danger small"></span>
 </div>
 
 <div class="row mb-3">
     <div class="col-md-6">
-        <label asp-for="Street" class="form-label">Street</label>
+        <label asp-for="Street" class="form-label">
+            <i class="bi bi-signpost-fill me-1"></i>Street
+        </label>
         <input asp-for="Street" class="form-control" />
-        <span asp-validation-for="Street" class="text-danger"></span>
+        <span asp-validation-for="Street" class="text-danger small"></span>
     </div>
+
     <div class="col-md-6">
-        <label asp-for="City" class="form-label">City</label>
+        <label asp-for="City" class="form-label">
+            <i class="bi bi-building-fill me-1"></i>City
+        </label>
         <input asp-for="City" class="form-control" />
-        <span asp-validation-for="City" class="text-danger"></span>
+        <span asp-validation-for="City" class="text-danger small"></span>
     </div>
-    @* <div class="col-md-4">
-        <label asp-for="StreetNumber" class="form-label">Street Number</label>
-        <input asp-for="StreetNumber" class="form-control" />
-        <span asp-validation-for="StreetNumber" class="text-danger"></span>
-    </div> *@
 </div>
 
 <div class="row mb-3">
     <div class="col-md-4">
-        <label asp-for="State" class="form-label">State</label>
+        <label asp-for="State" class="form-label">
+            <i class="bi bi-flag-fill me-1"></i>State
+        </label>
         <select asp-for="State" class="form-select" asp-items="states"></select>
-        <span asp-validation-for="State" class="text-danger"></span>
+        <span asp-validation-for="State" class="text-danger small"></span>
     </div>
+
     <div class="col-md-4">
-        <label asp-for="Zip" class="form-label">ZIP Code</label>
+        <label asp-for="Zip" class="form-label">
+            <i class="bi bi-mailbox me-1"></i>ZIP Code
+        </label>
         <input asp-for="Zip" class="form-control" />
-        <span asp-validation-for="Zip" class="text-danger"></span>
+        <span asp-validation-for="Zip" class="text-danger small"></span>
     </div>
+
     <div class="col-md-4">
-        <label asp-for="Country" class="form-label">Country</label>
+        <label asp-for="Country" class="form-label">
+            <i class="bi bi-globe me-1"></i>Country
+        </label>
         <select asp-for="Country" class="form-select" asp-items="countries"></select>
-        <span asp-validation-for="Country" class="text-danger"></span>
+        <span asp-validation-for="Country" class="text-danger small"></span>
     </div>
 </div>

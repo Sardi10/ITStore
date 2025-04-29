@@ -19,95 +19,103 @@
     };
 }
 
-@* <h2>@ViewData["Title"]</h2> *@
+<h2 class="mb-4">
+    <i class="bi bi-credit-card-2-front-fill text-primary me-2"></i>@ViewData["Title"]
+</h2>
 
-@* @if (!ViewData.ModelState.IsValid) *@
-@* { *@
-@*     <div class="alert alert-danger"> *@
-@*         <strong>Form has errors:</strong> *@
-@*         <ul> *@
-@*             @foreach (var modelState in ViewData.ModelState) *@
-@*             { *@
-@*                 if (modelState.Value.Errors.Count > 0) *@
-@*                 { *@
-@*                     <li><strong>@modelState.Key:</strong> @modelState.Value.Errors[0].ErrorMessage</li> *@
-@*                 } *@
-@*             } *@
-@*         </ul> *@
-@*     </div> *@
-
-<form asp-action="Create" method="post">
+<form asp-action="Create" method="post" class="card shadow-sm p-4">
     <div class="row mb-3">
         <div class="col-md-6">
-            <label asp-for="CardNumber" class="form-label">Card Number</label>
+            <label asp-for="CardNumber" class="form-label">
+                <i class="bi bi-credit-card-fill me-1"></i>Card Number
+            </label>
             <input asp-for="CardNumber" class="form-control" maxlength="16" />
-            <span asp-validation-for="CardNumber" class="text-danger"></span>
+            <span asp-validation-for="CardNumber" class="text-danger small"></span>
         </div>
+
         <div class="col-md-3">
-            <label asp-for="SecurityCode" class="form-label">Security Code (CVV)</label>
+            <label asp-for="SecurityCode" class="form-label">
+                <i class="bi bi-shield-lock-fill me-1"></i>CVV
+            </label>
             <input asp-for="SecurityCode" class="form-control" maxlength="3" />
-            <span asp-validation-for="SecurityCode" class="text-danger"></span>
+            <span asp-validation-for="SecurityCode" class="text-danger small"></span>
         </div>
+
         <div class="col-md-3">
-            <label asp-for="CardType" class="form-label">Card Type</label>
+            <label asp-for="CardType" class="form-label">
+                <i class="bi bi-ui-checks-grid me-1"></i>Card Type
+            </label>
             <select asp-for="CardType" class="form-select" asp-items="cardTypes"></select>
-            <span asp-validation-for="CardType" class="text-danger"></span>
+            <span asp-validation-for="CardType" class="text-danger small"></span>
         </div>
     </div>
 
     <div class="row mb-3">
         <div class="col-md-6">
-            <label asp-for="CardHolderName" class="form-label">Name on Card</label>
+            <label asp-for="CardHolderName" class="form-label">
+                <i class="bi bi-person-fill me-1"></i>Name on Card
+            </label>
             <input asp-for="CardHolderName" class="form-control" />
-            <span asp-validation-for="CardHolderName" class="text-danger"></span>
+            <span asp-validation-for="CardHolderName" class="text-danger small"></span>
         </div>
+
         <div class="col-md-6">
-            <label asp-for="ExpiryDate" class="form-label">Expiration Date</label>
+            <label asp-for="ExpiryDate" class="form-label">
+                <i class="bi bi-calendar2-check-fill me-1"></i>Expiration Date
+            </label>
             <input asp-for="ExpiryDate" class="form-control" placeholder="MM/YY" />
-            <span asp-validation-for="ExpiryDate" class="text-danger"></span>
+            <span asp-validation-for="ExpiryDate" class="text-danger small"></span>
         </div>
     </div>
 
-    <h4>Billing Address</h4>
+    <h5 class="mb-3">
+        <i class="bi bi-geo-alt-fill me-2 text-danger"></i>Billing Address
+    </h5>
+
     <div class="row mb-3">
         <div class="col-md-6">
             <label asp-for="BillingStreet" class="form-label">Street Address</label>
             <input asp-for="BillingStreet" class="form-control" />
-            <span asp-validation-for="BillingStreet" class="text-danger"></span>
+            <span asp-validation-for="BillingStreet" class="text-danger small"></span>
         </div>
+
         <div class="col-md-6">
             <label asp-for="BillingCity" class="form-label">City</label>
             <input asp-for="BillingCity" class="form-control" />
-            <span asp-validation-for="BillingCity" class="text-danger"></span>
+            <span asp-validation-for="BillingCity" class="text-danger small"></span>
         </div>
     </div>
 
-    <div class="row mb-3">
+    <div class="row mb-4">
         <div class="col-md-4">
             <label asp-for="BillingState" class="form-label">State</label>
             <select asp-for="BillingState" class="form-select" asp-items="states"></select>
-            <span asp-validation-for="BillingState" class="text-danger"></span>
+            <span asp-validation-for="BillingState" class="text-danger small"></span>
         </div>
+
         <div class="col-md-4">
             <label asp-for="BillingZip" class="form-label">ZIP Code</label>
             <input asp-for="BillingZip" class="form-control" />
-            <span asp-validation-for="BillingZip" class="text-danger"></span>
+            <span asp-validation-for="BillingZip" class="text-danger small"></span>
         </div>
+
         <div class="col-md-4">
             <label asp-for="BillingCountry" class="form-label">Country</label>
             <select asp-for="BillingCountry" class="form-select" asp-items="countries"></select>
-            <span asp-validation-for="BillingCountry" class="text-danger"></span>
+            <span asp-validation-for="BillingCountry" class="text-danger small"></span>
         </div>
     </div>
 
     <div class="text-end">
-        <button type="submit" class="btn btn-primary">Save Credit Card</button>
-        <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+        <button type="submit" class="btn btn-primary">
+            <i class="bi bi-save me-1"></i>Save Credit Card
+        </button>
+        <a asp-action="Index" class="btn btn-danger">
+            <i class="bi bi-x-circle me-1"></i>Cancel
+        </a>
     </div>
 </form>
 
 @section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
+    <partial name="_ValidationScriptsPartial" />
 }

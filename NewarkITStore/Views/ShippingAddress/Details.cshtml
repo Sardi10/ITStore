@@ -1,22 +1,44 @@
 ﻿@model NewarkITStore.Models.ShippingAddress
+
 @{
     ViewData["Title"] = "Shipping Address Details";
 }
 
-<h2>Shipping Address Details</h2>
+<h2 class="mb-4">
+    <i class="bi bi-geo-alt-fill text-primary me-2"></i>@ViewData["Title"]
+</h2>
 
-<dl class="row">
-    <dt class="col-sm-3">Name</dt>
-    <dd class="col-sm-9">@Model.AddressName</dd>
-    <dt class="col-sm-3">Street</dt>
-    <dd class="col-sm-9">@Model.Street @* @Model.StreetNumber *@</dd>
-    <dt class="col-sm-3">City</dt>
-    <dd class="col-sm-9">@Model.City</dd>
-    <dt class="col-sm-3">ZIP</dt>
-    <dd class="col-sm-9">@Model.Zip</dd>
-    <dt class="col-sm-3">Country</dt>
-    <dd class="col-sm-9">@Model.Country</dd>
-</dl>
+<div class="card shadow-sm p-4">
+    <dl class="row">
+        <dt class="col-sm-3">
+            <i class="bi bi-tag-fill me-1"></i>Name
+        </dt>
+        <dd class="col-sm-9">@Model.AddressName</dd>
 
-@* <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Edit</a> *@
-<a asp-action="Index" class="btn btn-secondary col-md-2 col-md-4 d-flex align-items-center justify-content-center">Back</a>
+        <dt class="col-sm-3">
+            <i class="bi bi-signpost-2-fill me-1"></i>Street
+        </dt>
+        <dd class="col-sm-9">@Model.Street</dd>
+
+        <dt class="col-sm-3">
+            <i class="bi bi-building-fill me-1"></i>City
+        </dt>
+        <dd class="col-sm-9">@Model.City</dd>
+
+        <dt class="col-sm-3">
+            <i class="bi bi-mailbox me-1"></i>ZIP
+        </dt>
+        <dd class="col-sm-9">@Model.Zip</dd>
+
+        <dt class="col-sm-3">
+            <i class="bi bi-globe-americas me-1"></i>Country
+        </dt>
+        <dd class="col-sm-9">@Model.Country</dd>
+    </dl>
+
+    <div class="d-flex justify-content-end mt-4">
+        <a asp-action="Index" class="btn btn-secondary px-4">
+            <i class="bi bi-arrow-left-circle me-1"></i>Back
+        </a>
+    </div>
+</div>

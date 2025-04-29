@@ -3,66 +3,64 @@
     ViewData["Title"] = "My Profile";
 }
 
-<h2>@ViewData["Title"]</h2>
+<h2 class="mb-4">
+    <i class="bi bi-person-circle text-primary me-2"></i>@ViewData["Title"]
+</h2>
 
-<div class="card p-4">
+<div class="card shadow-sm p-4">
     <div class="row align-items-center">
-        <div class="col-md-2 text-center">
+        <div class="col-md-3 text-center">
             @if (!string.IsNullOrEmpty(Model.ProfilePictureUrl))
             {
-                <img src="@Url.Content(Model.ProfilePictureUrl)" alt="Profile Picture" class="img-fluid rounded-circle mb-2" style="max-height: 120px;" />
+                <img src="@Url.Content(Model.ProfilePictureUrl)" alt="Profile Picture" class="img-fluid rounded-circle border border-3 border-primary shadow-sm" style="max-height: 150px;" />
             }
             else
             {
-                <div class="bg-light rounded-circle d-inline-block" style="width: 120px; height: 120px;">
-                    <span class="d-block text-muted mt-5">No Image</span>
+                <div class="bg-secondary-subtle rounded-circle d-flex align-items-center justify-content-center mx-auto" style="width: 150px; height: 150px;">
+                    <span class="text-muted"><i class="bi bi-person-slash fs-4"></i></span>
                 </div>
             }
         </div>
-        <div class="col-md-10">
-            <h5>Status: @Model.Status</h5>
-            <p><strong>Email:</strong> @Model.Email</p>
-            <p><strong>Phone:</strong> @(!string.IsNullOrEmpty(Model.PhoneNumber) ? Model.PhoneNumber : "Not Set")</p>
-            <p><strong>Date of Birth:</strong> @(Model.DateOfBirth?.ToShortDateString() ?? "Not Set")</p>
+
+        <div class="col-md-9">
+            <h5 class="mb-3">
+                <span class="badge bg-info text-dark">
+                    <i class="bi bi-award-fill me-1"></i>Status: @Model.Status
+                </span>
+            </h5>
+            <p class="mb-1"><i class="bi bi-envelope-fill me-1 text-muted"></i><strong>Email:</strong> @Model.Email</p>
+            <p class="mb-1"><i class="bi bi-telephone-fill me-1 text-muted"></i><strong>Phone:</strong> @(!string.IsNullOrEmpty(Model.PhoneNumber) ? Model.PhoneNumber : "Not Set")</p>
+            <p><i class="bi bi-calendar2-event-fill me-1 text-muted"></i><strong>Date of Birth:</strong> @(Model.DateOfBirth?.ToShortDateString() ?? "Not Set")</p>
+
+            <div class="d-flex flex-wrap gap-2 mt-3">
+                <a asp-action="Edit" class="btn btn-warning px-4">
+                    <i class="bi bi-pencil-fill me-1"></i>Edit Profile
+                </a>
+                <a asp-action="ChangePassword" class="btn btn-outline-dark px-4">
+                    <i class="bi bi-key-fill me-1"></i>Change Password
+                </a>
+            </div>
         </div>
     </div>
 
-    <div class="text-center mt-3">
-        <a asp-action="Edit" class="btn btn-warning px-4">Edit Profile</a>
+    <hr class="my-4" />
+
+    <h5 class="mb-2"><i class="bi bi-credit-card-fill me-1"></i>Credit Card</h5>
+    <p>@(string.IsNullOrEmpty(Model.MaskedCreditCard) ? "No credit card added." : Model.MaskedCreditCard)</p>
+    <div class="text-center mb-4">
+        <a asp-controller="CreditCard" asp-action="Index" class="btn btn-outline-primary w-50">
+            <i class="bi bi-gear-fill me-1"></i>Manage Cards
+        </a>
     </div>
 
-    <div class="text-center mt-2">
-        <a asp-action="ChangePassword" class="btn btn-outline-dark px-4">Change Password</a>
-    </div>
+    <hr class="my-4" />
 
-    <hr />
-
-    <h4>Credit Card</h4>
-    @if (!string.IsNullOrEmpty(Model.MaskedCreditCard))
-    {
-        <p>@Model.MaskedCreditCard</p>
-    }
-    else
-    {
-        <p>No credit card added.</p>
-    }
+    <h5 class="mb-2"><i class="bi bi-geo-alt-fill me-1"></i>Shipping Address</h5>
+    <p>@(string.IsNullOrEmpty(Model.DefaultShippingAddressName) ? "No address added." : Model.DefaultShippingAddressName)</p>
     <div class="text-center">
-        <a asp-controller="CreditCard" asp-action="Index" class="btn btn-outline-primary w-50">Manage Cards</a>
-    </div>
-
-    <hr />
-
-    <h4>Shipping Address</h4>
-    @if (!string.IsNullOrEmpty(Model.DefaultShippingAddressName))
-    {
-        <p>@Model.DefaultShippingAddressName</p>
-    }
-    else
-    {
-        <p>No address added.</p>
-    }
-    <div class="text-center">
-        <a asp-controller="ShippingAddress" asp-action="Index" class="btn btn-outline-primary w-50">Manage Addresses</a>
+        <a asp-controller="ShippingAddress" asp-action="Index" class="btn btn-outline-primary w-50">
+            <i class="bi bi-gear-fill me-1"></i>Manage Addresses
+        </a>
     </div>
 </div>
 

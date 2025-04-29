@@ -1,0 +1,137 @@
+﻿@model IEnumerable<NewarkITStore.ViewModels.AveragePriceByProductTypeViewModel>
+
+@{
+    ViewData["Title"] = "Average Product Price by Type";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<form method="get" class="row mb-4">
+    <div class="col-md-3">
+        <label>From</label>
+        <input type="date" name="startDate" class="form-control" value="@Context.Request.Query["startDate"]" />
+    </div>
+    <div class="col-md-3">
+        <label>To</label>
+        <input type="date" name="endDate" class="form-control" value="@Context.Request.Query["endDate"]" />
+    </div>
+    <div class="col-md-3 mt-4">
+        <button type="submit" class="btn btn-primary mt-2">Filter</button>
+    </div>
+</form>
+
+<canvas id="avgPriceChart" height="120"></canvas>
+
+<div class="mt-3">
+    <button id="downloadChartBtn" class="btn btn-outline-primary me-2">Download Chart as Image</button>
+    <button id="downloadCsvBtn" class="btn btn-outline-success me-2">Download CSV</button>
+    <button id="downloadPdfBtn" class="btn btn-outline-danger">Download PDF</button>
+</div>
+
+<table class="table table-bordered mt-4">
+    <thead class="table-light">
+        <tr>
+            <th>Product Type</th>
+            <th>Average Price</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.ProductType</td>
+                <td>@item.AveragePrice.ToString("C")</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+
+    <script>
+        const ctx = document.getElementById('avgPriceChart').getContext('2d');
+
+        const productTypes = @Html.Raw(Json.Serialize(Model.Select(m => m.ProductType)));
+        const averagePrices = @Html.Raw(Json.Serialize(Model.Select(m => m.AveragePrice)));
+
+        const chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: productTypes,
+                datasets: [{
+                    label: 'Average Price',
+                    data: averagePrices,
+                    backgroundColor: 'rgba(255, 99, 132, 0.6)'
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Average Product Price by Type'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return "Average Price: $" + context.parsed.y.toFixed(2);
+                            }
+                        }
+                    },
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        document.getElementById('downloadChartBtn').addEventListener('click', function () {
+            const a = document.createElement('a');
+            a.href = chart.toBase64Image();
+            a.download = 'average_price_chart.png';
+            a.click();
+        });
+
+        document.getElementById('downloadCsvBtn').addEventListener('click', function () {
+            const rows = [['Product Type', 'Average Price']];
+        @foreach (var item in Model)
+        {
+            <text>
+                        rows.push(["@item.ProductType", "@item.AveragePrice"]);
+            </text>
+        }
+
+            const csvContent = "data:text/csv;charset=utf-8," + rows.map(e => e.join(",")).join("\n");
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "average_price_by_type.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+
+        document.getElementById('downloadPdfBtn').addEventListener('click', async function () {
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF();
+            const content = document.querySelector("table");
+
+            await html2canvas(content).then(canvas => {
+                const imgData = canvas.toDataURL('image/png');
+                const imgProps = pdf.getImageProperties(imgData);
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+                pdf.addImage(imgData, 'PNG', 0, 10, pdfWidth, pdfHeight);
+                pdf.save("average_price_by_type.pdf");
+            });
+        });
+    </script>
+}

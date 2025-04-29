@@ -35,7 +35,8 @@ namespace NewarkITStore.Controllers
                 {
                     Id = user.Id,
                     Email = user.Email,
-                    Roles = string.Join(", ", roles)
+                    Roles = string.Join(", ", roles),
+                    Status = user.Status
                 });
             }
 
@@ -63,5 +64,21 @@ namespace NewarkITStore.Controllers
             }
             return RedirectToAction("Users");
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateStatus(string userId, string newStatus)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+                return NotFound();
+
+            user.Status = newStatus;
+            await _userManager.UpdateAsync(user);
+
+            TempData["SuccessMessage"] = $"Status for {user.Email} updated to {newStatus}.";
+            return RedirectToAction("Users");
+        }
+
     }
 }

@@ -35,31 +35,49 @@ public class HomeController : Controller
 
     public async Task<IActionResult> Index()
     {
-        var products = await _context.Products
-            .Include(p => p.ProductType)
-            .ToListAsync();
+        var products = await _context.Products.Include(p => p.ProductType).ToListAsync();
+        var offers = await _context.Offers.ToListAsync();
 
-        var today = DateTime.Today;
-
-        // Load active offers
-        var offers = await _context.Offers
-            .Where(o => o.StartDate <= today && o.EndDate >= today)
-            .ToListAsync();
         ViewBag.Offers = offers;
-
-        // Load user status if logged in
         if (User.Identity.IsAuthenticated)
         {
             var user = await _userManager.GetUserAsync(User);
-            ViewBag.UserStatus = user?.Status;
+            ViewBag.UserStatus = user?.Status ?? "Regular";
         }
         else
         {
-            ViewBag.UserStatus = null;
+            ViewBag.UserStatus = "Regular";
         }
 
         return View(products);
     }
+
+    public async Task<IActionResult> SearchProducts(string term)
+    {
+        var query = _context.Products.Include(p => p.ProductType).AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(term))
+        {
+            query = query.Where(p => p.Name.Contains(term) || p.ProductType.Name.Contains(term));
+        }
+
+        var products = await query.ToListAsync();
+        var offers = await _context.Offers.ToListAsync();
+
+        ViewBag.Offers = offers;
+        if (User.Identity.IsAuthenticated)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            ViewBag.UserStatus = user?.Status ?? "Regular";
+        }
+        else
+        {
+            ViewBag.UserStatus = "Regular";
+        }
+
+        return PartialView("_ProductCards", products);
+    }
+
 
 
     public IActionResult Privacy()

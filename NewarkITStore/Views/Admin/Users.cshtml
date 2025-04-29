@@ -4,35 +4,75 @@
     ViewData["Title"] = "Manage Users";
 }
 
-<h2>Manage Users</h2>
+@functions {
+    public string GetStatusBadgeClass(string status) => status switch
+    {
+        "Gold" => "warning",
+        "Silver" => "secondary",
+        "Platinum" => "info",
+        _ => "dark"
+    };
+}
+            <h2 class="mb-4">Manage Users</h2>
 
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th>Email</th>
-            <th>Roles</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var user in Model)
-        {
-            <tr>
-                <td>@user.Email</td>
-                <td>@user.Roles</td>
-                <td>
-                    <form asp-action="PromoteToAdmin" asp-controller="Admin" method="post" style="display:inline">
-                        <input type="hidden" name="id" value="@user.Id" />
-                        <button class="btn btn-sm btn-success" type="submit" @(user.Roles.Contains("Admin") ? "disabled" : "")>
-                            Promote to Admin
-                        </button>
-                    </form>
-                    <form asp-action="DeleteUser" asp-controller="Admin" method="post" style="display:inline" onsubmit="return confirm('Are you sure?');">
-                        <input type="hidden" name="id" value="@user.Id" />
-                        <button class="btn btn-sm btn-danger" type="submit">Delete</button>
-                    </form>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success">
+                    @TempData["SuccessMessage"]
+                </div>
+            }
+
+          
+                <table class="table table-bordered align-middle text-center">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Email</th>
+                            <th>Roles</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var user in Model)
+                        {
+                            <tr>
+                                <td>@user.Email</td>
+                                <td>@user.Roles</td>
+                                <td>
+                                    <span class="badge bg-@GetStatusBadgeClass(user.Status) px-3 py-2">@user.Status</span>
+                                </td>
+                                <td>
+                                    <div class="d-flex flex-wrap justify-content-center gap-2">
+                                        <form asp-action="PromoteToAdmin" asp-controller="Admin" method="post">
+                                            <input type="hidden" name="id" value="@user.Id" />
+                                            <button class="btn btn-sm btn-success" type="submit" @(user.Roles.Contains("Admin") ? "disabled" : "")>
+                                                Promote to Admin
+                                            </button>
+                                        </form>
+
+                                        <form asp-action="UpdateStatus" asp-controller="Admin" method="post" class="d-flex align-items-center gap-2">
+                                            <input type="hidden" name="userId" value="@user.Id" />
+                                            <select name="newStatus" class="form-select form-select-sm w-auto">
+                                                <option value="Regular" selected="@("Regular" == user.Status)">Regular</option>
+                                                <option value="Silver" selected="@("Silver" == user.Status)">Silver</option>
+                                                <option value="Gold" selected="@("Gold" == user.Status)">Gold</option>
+                                                <option value="Platinum" selected="@("Platinum" == user.Status)">Platinum</option>
+                                            </select>
+                                            <button type="submit" class="btn btn-sm btn-outline-primary">Update</button>
+                                        </form>
+
+                                        <form asp-action="DeleteUser" asp-controller="Admin" method="post" onsubmit="return confirm('Are you sure?');">
+                                            <input type="hidden" name="id" value="@user.Id" />
+                                            <button class="btn btn-sm btn-danger" type="submit">Delete</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+           
+
+       
+    
+

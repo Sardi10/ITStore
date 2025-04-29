@@ -4,67 +4,81 @@
     ViewData["Title"] = "Your Cart";
 }
 
-<h2>Your Cart (@Model.Count() items)</h2>
+<div class="container ">
+    <h2 class="fw-bold mb-4">
+        <i class="bi bi-cart4"></i> Your Cart (@Model.Count() item@(Model.Count() != 1 ? "s" : ""))
+    </h2>
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>Item</th>
-            <th>Price</th>
-            <th>Quantity</th>
-            <th>Total</th>
-            <th>Action</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td>
-                    @item.Product.Name
-                    @if (item.Product.RecommendedPrice > item.PricePerUnit)
-                    {
-                        <span class="badge rounded-pill bg-success ms-2">Offer Applied!</span>
-                    }
-                </td>
-                <td>
-                    @if (item.Product.RecommendedPrice > item.PricePerUnit)
-                    {
-                        <span class="text-muted text-decoration-line-through me-1">
-                            @(item.Product.RecommendedPrice.ToString("C"))
-                        </span>
-                        <span class="text-success fw-bold">@(item.PricePerUnit.ToString("C"))</span>
-                    }
-                    else
-                    {
-                        @(item.PricePerUnit.ToString("C"))
-                    }
-                </td>
-                <td>@item.Quantity</td>
-                <td>@((item.PricePerUnit * item.Quantity).ToString("C"))</td>
-                <td>
-                    <form asp-action="Remove" method="post">
-                        <input type="hidden" name="basketItemId" value="@item.BasketItemId" />
-                        <button type="submit" class="btn btn-sm btn-danger">
-                            <i class="bi bi-trash"></i> Remove
-                        </button>
-                    </form>
-                </td>
-            </tr>
+    @if (Model.Any())
+    {
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="table-responsive shadow-sm rounded-3">
+                    <table class="table align-middle table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Item</th>
+                                <th>Price</th>
+                                <th>Quantity</th>
+                                <th>Total</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr id="row-@item.BasketItemId">
+                                    <td class="fw-semibold">
+                                        @item.Product.Name
+                                        @if (item.Product.RecommendedPrice > item.PricePerUnit)
+                                        {
+                                            <span class="badge bg-success ms-2">Offer Applied!</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (item.Product.RecommendedPrice > item.PricePerUnit)
+                                        {
+                                            <span class="text-muted text-decoration-line-through me-1">
+                                                @(item.Product.RecommendedPrice.ToString("C"))
+                                            </span>
+                                            <span class="text-success fw-bold">@(item.PricePerUnit.ToString("C"))</span>
+                                        }
+                                        else
+                                        {
+                                            <span>@(item.PricePerUnit.ToString("C"))</span>
+                                        }
+                                    </td>
+                                    <td>@item.Quantity</td>
+                                    <td class="fw-bold">@((item.PricePerUnit * item.Quantity).ToString("C"))</td>
+                                    <td>
+                                        <form asp-action="Remove" method="post" class="d-inline">
+                                            <input type="hidden" name="basketItemId" value="@item.BasketItemId" />
+                                            <button type="submit" class="btn btn-sm btn-danger rounded-pill">
+                                                <i class="bi bi-trash"></i> Remove
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
 
-        }
-    </tbody>
-</table>
-
-
-    
-<div id="cart-summary">
-  
-    @await Html.PartialAsync("_BasketSummary", Model)
-    
+            <div class="col-lg-4">
+                <div id="cart-summary">
+                    @await Html.PartialAsync("_BasketSummary", Model)
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info text-center mt-4" role="alert">
+            <i class="bi bi-info-circle"></i> Your cart is empty. Start shopping now!
+        </div>
+    }
 </div>
- 
-
 
 @section Scripts {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

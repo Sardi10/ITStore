@@ -12,59 +12,63 @@
     var offer = offers?.FirstOrDefault(o => o.ProductId == product.ProductId);
     bool isEligible = status == "Gold" || status == "Platinum";
 
-    <div class="col-md-4 mb-4">
-        <div class="card shadow-sm h-100">
-            <div class="card-body d-flex flex-column">
-                @if (!string.IsNullOrEmpty(product.ImageFileName))
-                {
+    <div class="col-sm-6 col-md-4 col-lg-3 d-flex">
+        <div class="card shadow-sm border-0 w-100 h-100 product-card p-2">
+            @if (!string.IsNullOrEmpty(product.ImageFileName))
+            {
+                <div class="position-relative">
                     <img src="~/images/@product.ImageFileName"
-                         class="card-img-top mb-3"
-                         style="object-fit: contain; height: 200px;" />
-                }
+                         class="card-img-top rounded-3"
+                         style="object-fit: contain; height: 220px;" />
 
-                <h5 class="card-title">@product.Name</h5>
-                <h6 class="card-subtitle text-muted mb-2">@product.ProductType?.Name</h6>
-                <p class="card-text flex-grow-1">@product.Description</p>
-
-                @if (offer != null && isEligible)
-                {
-                    var daysLeft = (offer.EndDate - DateTime.Today).Days;
-
-                    <p>
-                        <strong>Price:</strong>
-                        <span class="text-muted text-decoration-line-through">$@product.RecommendedPrice</span>
-                        <span class="text-success fw-bold ms-2">$@offer.OfferPrice</span>
-                        <span class="badge bg-success ms-2">Offer!</span>
-                    </p>
-
-                    @if (daysLeft > 0)
+                    @if (offer != null && isEligible)
                     {
-                        <p class="text-danger fw-bold">Ends in @daysLeft day@(daysLeft > 1 ? "s" : "")!</p>
+                        <span class="badge bg-success position-absolute top-0 start-0 m-2">Offer</span>
+                    }
+                </div>
+            }
+
+            <div class="card-body d-flex flex-column">
+                <h5 class="card-title fw-bold text-truncate">@product.Name</h5>
+                <h6 class="card-subtitle text-muted mb-2">@product.ProductType?.Name</h6>
+                <p class="card-text small text-truncate" title="@product.Description">@product.Description</p>
+
+                <div class="mb-3">
+                    @if (offer != null && isEligible)
+                    {
+                        var daysLeft = (offer.EndDate - DateTime.Today).Days;
+
+                        <div>
+                            <span class="text-muted text-decoration-line-through me-2">$@product.RecommendedPrice</span>
+                            <span class="text-success fw-bold">$@offer.OfferPrice</span>
+                        </div>
+
+                        <p class="small text-danger fw-semibold">
+                            @(daysLeft > 0 ? $"Ends in {daysLeft} day{(daysLeft > 1 ? "s" : "")}" : "Last day!")
+                        </p>
                     }
                     else
                     {
-                        <p class="text-danger fw-bold">Last day to get this offer!</p>
+                        <span class="fw-bold">Price: $@product.RecommendedPrice</span>
                     }
-                }
-                else
-                {
-                    <p><strong>Price:</strong> $@product.RecommendedPrice</p>
-                }
+                </div>
 
-                @if (SignInManager.IsSignedIn(User))
-                {
-                    <form asp-controller="Basket" asp-action="Add" method="post">
-                        <input type="hidden" name="productId" value="@product.ProductId" />
-                        <button type="submit" class="btn btn-outline-primary w-100">Add to Basket</button>
-                    </form>
-                }
-                else
-                {
-                    <form method="get" asp-area="Identity" asp-page="/Account/Login">
-                        <input type="hidden" name="ReturnUrl" value="/Home" />
-                        <button type="submit" class="btn btn-outline-primary w-100">Add to Basket</button>
-                    </form>
-                }
+                <div class="mt-auto">
+                    @if (SignInManager.IsSignedIn(User))
+                    {
+                        <form asp-controller="Basket" asp-action="Add" method="post">
+                            <input type="hidden" name="productId" value="@product.ProductId" />
+                            <button type="submit" class="btn btn-primary w-100">Add to Basket</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <form method="get" asp-area="Identity" asp-page="/Account/Login">
+                            <input type="hidden" name="ReturnUrl" value="/Home" />
+                            <button type="submit" class="btn btn-primary w-100">Add to Basket</button>
+                        </form>
+                    }
+                </div>
             </div>
         </div>
     </div>

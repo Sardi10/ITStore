@@ -1,35 +1,66 @@
 ﻿@model NewarkITStore.Models.Order
 
-<h2>Order Confirmation</h2>
-<p>Thank you for your purchase!</p>
-<p><strong>Order #: </strong>@Model.OrderId</p>
-<p><strong>Date:</strong> @Model.OrderDate.ToShortDateString()</p>
-@if (Model.OrderItems.Any(item => item.Product.RecommendedPrice > item.PricePerUnit))
-{
-    <p class="text-success"><i class="bi bi-tags-fill"></i> Discounts Applied to your order!</p>
-}
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h2 class="fw-bold">
+            <i class="bi bi-check-circle-fill text-success"></i> Order Confirmation
+        </h2>
+        <p class="lead">Thank you for your purchase!</p>
+    </div>
 
+    <div class="row justify-content-center mb-5">
+        <div class="col-lg-6">
+            <div class="p-4 border rounded-3 shadow-sm bg-light">
+                <p class="mb-2"><strong>Order #:</strong> @Model.OrderId</p>
+                <p class="mb-2"><strong>Date:</strong> @Model.OrderDate.ToShortDateString()</p>
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>Product</th>
-            <th>Price</th>
-            <th>Qty</th>
-            <th>Total</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model.OrderItems)
-        {
-            <tr>
-                <td>@item.Product.Name</td>
-                <td>@item.PricePerUnit.ToString("C")</td>
-                <td>@item.Quantity</td>
-                <td>@((item.PricePerUnit * item.Quantity).ToString("C"))</td>
-            </tr>
-        }
-    </tbody>
-</table>
+                @if (Model.OrderItems.Any(item => item.Product.RecommendedPrice > item.PricePerUnit))
+                {
+                    <div class="alert alert-success d-flex align-items-center mt-3" role="alert">
+                        <i class="bi bi-tags-fill me-2"></i>
+                        <div>Discounts Applied to your order!</div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
 
-<h4 class="text-end">Total: <strong>@Model.TotalAmount.ToString("C")</strong></h4>
+    <div class="table-responsive mb-5">
+        <table class="table table-striped align-middle shadow-sm rounded-3 overflow-hidden">
+            <thead class="table-light">
+                <tr>
+                    <th>Product</th>
+                    <th>Price</th>
+                    <th>Qty</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.OrderItems)
+                {
+                    <tr>
+                        <td>@item.Product.Name</td>
+                        <td>@item.PricePerUnit.ToString("C")</td>
+                        <td>@item.Quantity</td>
+                        <td>@((item.PricePerUnit * item.Quantity).ToString("C"))</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="row justify-content-end">
+        <div class="col-md-4">
+            <div class="p-4 border rounded-3 shadow-sm">
+                <h4 class="text-end mb-0">Total: <span class="fw-bold text-success">@Model.TotalAmount.ToString("C")</span></h4>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center mt-5">
+        <a asp-controller="Home" asp-action="Index" class="btn btn-outline-primary btn-lg px-5">
+            <i class="bi bi-arrow-left-circle"></i> Continue Shopping
+        </a>
+    </div>
+
+</div>

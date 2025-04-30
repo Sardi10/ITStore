@@ -10,7 +10,7 @@ COPY . .
 # Change directory and restore from correct path
 WORKDIR /src/NewarkITStore
 RUN dotnet restore "NewarkITStore.csproj"
-RUN dotnet publish "NewarkITStore.csproj" -c Release -o /app/publish
+RUN dotnet publish "NewarkITStore.csproj" -c Release -o /app/publish --no-restore
 
 FROM base AS final
 WORKDIR /app

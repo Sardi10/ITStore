@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: newarkitstore
+    runtime: docker
+    plan: free
+    region: oregon
+    buildCommand: ""
+    startCommand: ""
+    envVars:
+      - key: DefaultConnection
+        fromDatabase:
+          name: newarkitstore-db
+          property: connectionString
+
+databases:
+  - name: newarkitstore-db

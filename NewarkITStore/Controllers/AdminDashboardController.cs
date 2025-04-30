@@ -100,7 +100,11 @@ namespace NewarkITStore.Controllers
              .Where(o => o.CreditCardId != null);
 
             if (!string.IsNullOrEmpty(email))
-                query = query.Where(o => o.User.Email.Contains(email));
+            {
+                var loweredEmail = email.ToLower();
+                query = query.Where(o => o.User.Email.ToLower().Contains(loweredEmail));
+            }
+
 
             if (!string.IsNullOrEmpty(cardLast4))
                 query = query.Where(o => o.CreditCard.CardNumber.EndsWith(cardLast4));
@@ -144,10 +148,17 @@ namespace NewarkITStore.Controllers
                 query = query.Where(o => o.OrderDate <= endDate.Value.Date.AddDays(1).AddSeconds(-1));
 
             if (!string.IsNullOrEmpty(productName))
-                query = query.Where(o => o.OrderItems.Any(oi => oi.Product.Name.Contains(productName)));
+            {
+                var loweredProductName = productName.ToLower();
+                query = query.Where(o => o.OrderItems.Any(oi => oi.Product.Name.ToLower().Contains(loweredProductName)));
+            }
 
             if (!string.IsNullOrEmpty(productCategory))
-                query = query.Where(o => o.OrderItems.Any(oi => oi.Product.ProductType.Name.Contains(productCategory)));
+            {
+                var loweredCategory = productCategory.ToLower();
+                query = query.Where(o => o.OrderItems.Any(oi => oi.Product.ProductType.Name.ToLower().Contains(loweredCategory)));
+            }
+
 
             var result = await query
                 .SelectMany(o => o.OrderItems.Select(oi => new

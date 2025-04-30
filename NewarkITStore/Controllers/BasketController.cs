@@ -273,8 +273,11 @@ namespace NewarkITStore.Controllers
 
             if (!string.IsNullOrEmpty(searchProduct))
             {
-                ordersQuery = ordersQuery.Where(o => o.OrderItems.Any(oi => oi.Product.Name.Contains(searchProduct)));
+                var lowered = searchProduct.ToLower();
+                ordersQuery = ordersQuery.Where(o => o.OrderItems
+                    .Any(oi => oi.Product.Name.ToLower().Contains(lowered)));
             }
+
 
             if (startDate.HasValue)
             {

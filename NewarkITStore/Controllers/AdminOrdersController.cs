@@ -29,7 +29,8 @@ namespace NewarkITStore.Controllers
 
             if (!string.IsNullOrEmpty(searchEmail))
             {
-                query = query.Where(o => o.User.Email.Contains(searchEmail));
+                var loweredEmail = searchEmail.ToLower();
+                query = query.Where(o => o.User.Email.ToLower().Contains(loweredEmail));
             }
 
             if (filterStatus.HasValue)

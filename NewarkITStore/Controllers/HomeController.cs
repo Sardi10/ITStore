@@ -22,15 +22,15 @@ public class HomeController : Controller
         _userManager = userManager;
     }
 
-    [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> Manage()
-    {
-        var products = await _context.Products
-            .Include(p => p.ProductType)
-            .ToListAsync();
+    //[Authorize(Roles = "Admin")]
+    //public async Task<IActionResult> Manage()
+    //{
+    //    var products = await _context.Products
+    //        .Include(p => p.ProductType)
+    //        .ToListAsync();
 
-        return View(products);
-    }
+    //    return View(products);
+    //}
 
 
     public async Task<IActionResult> Index()
@@ -58,7 +58,12 @@ public class HomeController : Controller
 
         if (!string.IsNullOrWhiteSpace(term))
         {
-            query = query.Where(p => p.Name.Contains(term) || p.ProductType.Name.Contains(term));
+            term = term.ToLower();
+
+            query = query.Where(p =>
+                p.Name.ToLower().Contains(term) ||
+                p.ProductType.Name.ToLower().Contains(term));
+
         }
 
         var products = await query.ToListAsync();

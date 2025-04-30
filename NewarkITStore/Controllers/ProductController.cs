@@ -137,7 +137,7 @@ namespace NewarkITStore.Controllers
                     }
                     else
                     {
-                        // kKeep the existing image if none uploaded
+                        // kKeep the existing image if none uploadedm
                         product.ImageFileName = existingProduct.ImageFileName;
                     }
 

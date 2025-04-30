@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using NewarkITStore.Data;
 using NewarkITStore.Models;
+using Npgsql.EntityFrameworkCore.PostgreSQL;
+
 //using Rotativa.AspNetCore;
 
 

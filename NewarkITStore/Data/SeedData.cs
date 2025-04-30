@@ -23,8 +23,8 @@ namespace NewarkITStore.Data
             }
 
             // Step 2: Create Super Admin
-            string FirstName = "Super";
-            string LastName = "Admin";
+            string firstName = "Super";
+            string lastName = "Admin";
             string email = "admin@store.com";
             string password = "Admin123!";
 
@@ -33,6 +33,8 @@ namespace NewarkITStore.Data
             {
                 var adminUser = new ApplicationUser
                 {
+                    FirstName = firstName,
+                    LastName = lastName,
                     UserName = email,
                     Email = email,
                     EmailConfirmed = true

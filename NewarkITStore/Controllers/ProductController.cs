@@ -11,10 +11,12 @@ namespace NewarkITStore.Controllers
     public class ProductController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IWebHostEnvironment _env;
 
-        public ProductController(ApplicationDbContext context)
+        public ProductController(ApplicationDbContext context, IWebHostEnvironment env)
         {
             _context = context;
+            _env = env;
         }
 
         public IActionResult Index()
@@ -50,17 +52,24 @@ namespace NewarkITStore.Controllers
             {
                 if (imageFile != null && imageFile.Length > 0)
                 {
-                    // Create path
-                    var fileName = Path.GetFileName(imageFile.FileName);
-                    var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Images", fileName);
+                    // Ensure "images" directory under wwwroot exists
+                    var uploadsDir = Path.Combine(_env.WebRootPath, "images");
+                    if (!Directory.Exists(uploadsDir))
+                    {
+                        Directory.CreateDirectory(uploadsDir);
+                    }
 
-                    // Save file to wwwroot/images
+                    // Generate unique filename
+                    var fileName = Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
+                    var filePath = Path.Combine(uploadsDir, fileName);
+
+                    // Save the uploaded file
                     using (var stream = new FileStream(filePath, FileMode.Create))
                     {
                         await imageFile.CopyToAsync(stream);
                     }
 
-                    // Save the filename in the product
+                    // Store relative path or filename in DB
                     product.ImageFileName = fileName;
                 }
 
@@ -72,6 +81,7 @@ namespace NewarkITStore.Controllers
             ViewBag.ProductTypes = new SelectList(_context.ProductTypes, "ProductTypeId", "Name", product.ProductTypeId);
             return View(product);
         }
+
 
         // GET: /Product/Edit/5
         [Authorize(Roles = "Admin")]
@@ -99,10 +109,24 @@ namespace NewarkITStore.Controllers
             {
                 try
                 {
+                    // Load the existing product (to preserve other unchanged fields if needed)
+                    var existingProduct = await _context.Products
+                        .AsNoTracking()
+                        .FirstOrDefaultAsync(p => p.ProductId == id);
+
+                    if (existingProduct == null)
+                        return NotFound();
+
                     if (imageFile != null && imageFile.Length > 0)
                     {
-                        var fileName = Path.GetFileName(imageFile.FileName);
-                        var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Images", fileName);
+                        // Ensure upload folder exists
+                        var uploadsDir = Path.Combine(_env.WebRootPath, "images");
+                        if (!Directory.Exists(uploadsDir))
+                            Directory.CreateDirectory(uploadsDir);
+
+                        // Generate unique filename and save file
+                        var fileName = Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
+                        var filePath = Path.Combine(uploadsDir, fileName);
 
                         using (var stream = new FileStream(filePath, FileMode.Create))
                         {
@@ -113,12 +137,8 @@ namespace NewarkITStore.Controllers
                     }
                     else
                     {
-                        // Keep existing image if no new file is uploaded
-                        var existingProduct = await _context.Products
-                            .AsNoTracking()
-                            .FirstOrDefaultAsync(p => p.ProductId == id);
-
-                        product.ImageFileName = existingProduct?.ImageFileName;
+                        // Keep the existing image if none uploaded
+                        product.ImageFileName = existingProduct.ImageFileName;
                     }
 
                     _context.Update(product);
@@ -138,6 +158,7 @@ namespace NewarkITStore.Controllers
             ViewBag.ProductTypes = new SelectList(_context.ProductTypes, "ProductTypeId", "Name", product.ProductTypeId);
             return View(product);
         }
+
 
         // POST: /Product/Delete/5
         [HttpPost]

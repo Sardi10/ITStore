@@ -23,8 +23,11 @@ namespace NewarkITStore.Data
             }
 
             // Step 2: Create Super Admin
+            string FirstName = "Super";
+            string LastName = "Admin";
             string email = "admin@store.com";
             string password = "Admin123!";
+
 
             if (await userManager.FindByEmailAsync(email) == null)
             {

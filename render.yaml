@@ -2,7 +2,7 @@ services:
   - type: web
     name: newarkitstore
     runtime: docker
-    plan: free
+    plan: Hobby
     region: oregon
     buildCommand: ""
     startCommand: ""

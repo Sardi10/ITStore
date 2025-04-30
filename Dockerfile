@@ -1,18 +1,20 @@
-# Use the official .NET 8 SDK image
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
-WORKDIR /app
-EXPOSE 80
-
+# Use the official .NET SDK image for build
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+
 WORKDIR /src
+
+# Copy all files to /src
 COPY . .
 
-# Change directory and restore from correct path
+# Navigate into the folder containing the .csproj file
 WORKDIR /src/NewarkITStore
-RUN dotnet restore "NewarkITStore.csproj"
-RUN dotnet publish "NewarkITStore.csproj" -c Release -o /app/publish --no-restore
 
-FROM base AS final
+# Restore and publish the project
+RUN dotnet restore
+RUN dotnet publish -c Release -o /app/publish --no-restore
+
+# Use ASP.NET runtime image for running the app
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 WORKDIR /app
 COPY --from=build /app/publish .
 

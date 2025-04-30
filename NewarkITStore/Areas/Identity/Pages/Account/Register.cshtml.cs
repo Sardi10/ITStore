@@ -84,7 +84,8 @@ namespace NewarkITStore.Areas.Identity.Pages.Account
             [Required]
             [Display(Name = "Last Name")]
             public string LastName { get; set; }
-
+            public string Status  { get; set; } //"Platinum";
+            public string ProfilePictureUrl  { get; set; } //"/wwwroot/Images/facebook.jpg";
 
             [Required]
             [EmailAddress]

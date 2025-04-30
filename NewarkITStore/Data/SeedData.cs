@@ -27,6 +27,8 @@ namespace NewarkITStore.Data
             string lastName = "Admin";
             string email = "admin@store.com";
             string password = "Admin123!";
+            string status = "Platinum";
+            string profilePictureUrl = "/wwwroot/Images/facebook.jpg";
 
 
             if (await userManager.FindByEmailAsync(email) == null)
@@ -37,6 +39,8 @@ namespace NewarkITStore.Data
                     LastName = lastName,
                     UserName = email,
                     Email = email,
+                    Status = status,
+                    ProfilePictureUrl = profilePictureUrl,
                     EmailConfirmed = true
                 };
 

@@ -17,7 +17,7 @@
             @if (!string.IsNullOrEmpty(product.ImageFileName))
             {
                 <div class="position-relative">
-                    <img src="~/images/@product.ImageFileName"
+                    <img src="@Url.Content("~/images/" + product.ImageFileName)"
                          class="card-img-top rounded-3"
                          style="object-fit: contain; height: 220px;" />
 

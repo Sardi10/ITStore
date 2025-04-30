@@ -73,9 +73,16 @@ namespace NewarkITStore.Controllers
             user.PhoneNumber = model.PhoneNumber;
             user.DateOfBirth = model.DateOfBirth;
 
-            if (model.ProfilePictureFile != null)
+            if (model.ProfilePictureFile != null && model.ProfilePictureFile.Length > 0)
             {
                 var uploads = Path.Combine(_env.WebRootPath, "images");
+
+                // Ensure the /wwwroot/images directory exists
+                if (!Directory.Exists(uploads))
+                {
+                    Directory.CreateDirectory(uploads);
+                }
+
                 var fileName = Guid.NewGuid().ToString() + Path.GetExtension(model.ProfilePictureFile.FileName);
                 var filePath = Path.Combine(uploads, fileName);
 
@@ -86,6 +93,7 @@ namespace NewarkITStore.Controllers
 
                 user.ProfilePictureUrl = "/images/" + fileName;
             }
+
 
             // Only admin can change status
             if (User.IsInRole("Admin"))

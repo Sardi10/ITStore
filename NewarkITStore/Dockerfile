@@ -12,4 +12,5 @@ RUN dotnet publish "./NewarkITStore.csproj" -c Release -o /app/publish
 FROM base AS final
 WORKDIR /app
 COPY --from=build /app/publish .
+RUN mkdir -p /app/wwwroot/images
 ENTRYPOINT ["dotnet", "NewarkITStore.dll"]

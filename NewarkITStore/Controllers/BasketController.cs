@@ -283,7 +283,7 @@ namespace NewarkITStore.Controllers
 
             if (endDate.HasValue)
             {
-                ordersQuery = ordersQuery.Where(o => o.OrderDate <= endDate.Value);
+                ordersQuery = ordersQuery.Where(o => o.OrderDate <= endDate.Value.Date.AddDays(1).AddTicks(-1));
             }
 
             var orders = await ordersQuery
